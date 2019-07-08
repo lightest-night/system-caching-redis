@@ -3,46 +3,47 @@ install:
 
 pull_requests:
   do_not_increment_build_number: true
-  
+
 init:
   - git config --global core.autocrlf true
 
 nuget:
   disable_publish_on_pr: true
-  
+
+skip_tags: true
+
 before_build:
-  # Display .NET Core version
+  # Display .net version
   - dotnet --version
   # Display minimal restore text
   - dotnet restore --verbosity m
   # Run the automatic versioning
   - gitversion %APPVEYOR_BUILD_FOLDER% /l console /output buildserver /updateAssemblyInfo /nofetch /b %APPVEYOR_REPO_BRANCH%
-    
+
 build_script:
-  # Build everything
+  # Build all the things!
   - dotnet build --no-restore
 
 test_script:
-  # Run all tests
+  # Test all the things!
   - dotnet test --no-build --no-restore
 
 after_test:
   - dotnet pack -c Release -o ../packages -p:PackageVersion=%GitVersion_NuGetVersion%
   - ps: Get-ChildItem packages\*.nupkg | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
-    
+
 deploy:
   - provider: NuGet
     api_key:
       secure: msDwO0JAo+DsuDtqwM+dkmEiAEe8xEVNJKkVmWmm9HdheHfSlU7BAqGvS1KvrkKf
-    skip_symbols: true
     artifact: /.*\.nupkg/
     on:
       branch: develop
-      
+
   - provider: NuGet
     api_key:
       secure: msDwO0JAo+DsuDtqwM+dkmEiAEe8xEVNJKkVmWmm9HdheHfSlU7BAqGvS1KvrkKf
     skip_symbols: true
     artifact: /.*\.nupkg/
     on:
-      APPVEYOR_REPO_TAG: true
+      branch: master
