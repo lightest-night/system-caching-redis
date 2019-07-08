@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using StackExchange.Redis;
+// ReSharper disable UnusedMethodReturnValue.Global
 
 namespace LightestNight.System.Caching.Redis
 {
