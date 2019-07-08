@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caching.Redis", "Caching.Redis\Caching.Redis.csproj", "{A2F7085B-07A6-4979-865D-826C6A183506}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caching.Redis.Tests", "Caching.Redis.Tests\Caching.Redis.Tests.csproj", "{6CB9C4B5-950D-4E4D-A267-A7D2D2E54F7F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A2F7085B-07A6-4979-865D-826C6A183506}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2F7085B-07A6-4979-865D-826C6A183506}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2F7085B-07A6-4979-865D-826C6A183506}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2F7085B-07A6-4979-865D-826C6A183506}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6CB9C4B5-950D-4E4D-A267-A7D2D2E54F7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CB9C4B5-950D-4E4D-A267-A7D2D2E54F7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CB9C4B5-950D-4E4D-A267-A7D2D2E54F7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CB9C4B5-950D-4E4D-A267-A7D2D2E54F7F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

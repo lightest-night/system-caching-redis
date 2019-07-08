@@ -1,0 +1,64 @@
+﻿{
+  "version": "1.0.0",
+  "restore": {
+    "projectUniqueName": "/Users/wooderz/Development/Lightest Night/System/Caching.Redis/Caching.Redis/Caching.Redis.csproj",
+    "projectName": "LightestNight.System.Caching.Redis",
+    "projectPath": "/Users/wooderz/Development/Lightest Night/System/Caching.Redis/Caching.Redis/Caching.Redis.csproj",
+    "outputPath": "/Users/wooderz/Development/Lightest Night/System/Caching.Redis/Caching.Redis/obj/",
+    "projectStyle": "PackageReference",
+    "fallbackFolders": [
+      "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
+    ],
+    "originalTargetFrameworks": [
+      "netstandard2.0"
+    ],
+    "sources": {
+      "http://localhost:5555/v3/index.json": {},
+      "https://api.nuget.org/v3/index.json": {},
+      "https://bart.whenyoumove.com/nuget/wym/": {}
+    },
+    "frameworks": {
+      "netstandard2.0": {
+        "projectReferences": {}
+      }
+    },
+    "warningProperties": {
+      "warnAsError": [
+        "NU1605"
+      ]
+    }
+  },
+  "frameworks": {
+    "netstandard2.0": {
+      "dependencies": {
+        "Microsoft.Extensions.DependencyInjection": {
+          "target": "Package",
+          "version": "[2.2.0, )"
+        },
+        "Microsoft.Extensions.Options.ConfigurationExtensions": {
+          "target": "Package",
+          "version": "[2.2.0, )"
+        },
+        "NETStandard.Library": {
+          "suppressParent": "All",
+          "target": "Package",
+          "version": "[2.0.3, )",
+          "autoReferenced": true
+        },
+        "Newtonsoft.Json": {
+          "target": "Package",
+          "version": "[12.0.2, )"
+        },
+        "StackExchange.Redis": {
+          "target": "Package",
+          "version": "[2.0.601, )"
+        }
+      },
+      "imports": [
+        "net461"
+      ],
+      "assetTargetFallback": true,
+      "warn": true
+    }
+  }
+}
