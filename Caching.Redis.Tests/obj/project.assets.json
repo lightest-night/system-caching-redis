@@ -6585,15 +6585,13 @@
         "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "/Users/wooderz/.config/NuGet/NuGet.Config"
+        "/Users/wooderz/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp2.2"
       ],
       "sources": {
-        "http://localhost:5555/v3/index.json": {},
-        "https://api.nuget.org/v3/index.json": {},
-        "https://bart.whenyoumove.com/nuget/wym/": {}
+        "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "netcoreapp2.2": {
