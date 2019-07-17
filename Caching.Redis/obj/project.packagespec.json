@@ -33,7 +33,7 @@
       "dependencies": {
         "LightestNight.System.ServiceResolution": {
           "target": "Package",
-          "version": "[1.1.0-alpha0003, )"
+          "version": "[1.1.0-alpha0004, )"
         },
         "Microsoft.Extensions.DependencyInjection": {
           "target": "Package",

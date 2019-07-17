@@ -2,7 +2,7 @@
   "version": 3,
   "targets": {
     ".NETStandard,Version=v2.0": {
-      "LightestNight.System.ServiceResolution/1.1.0-alpha0003": {
+      "LightestNight.System.ServiceResolution/1.1.0-alpha0004": {
         "type": "package",
         "dependencies": {
           "LightestNight.System.Utilities": "0.1.0-alpha0003",
@@ -297,15 +297,15 @@
     }
   },
   "libraries": {
-    "LightestNight.System.ServiceResolution/1.1.0-alpha0003": {
-      "sha512": "flXANg27dTtSlrqDzICQuh0M+xp0KspWmTjUkKmZefIKHxdkKdr/uywHAOzklkc9c5u5AMEfsjMII3OTIcJceQ==",
+    "LightestNight.System.ServiceResolution/1.1.0-alpha0004": {
+      "sha512": "pDGuUSOOvwLiJA/ICg8AJH7GBD0MRUlmHLgH878+y+EodRcyImbA7grYwbX0Z5Y9QDelFpmS7xp2m751YftFLg==",
       "type": "package",
-      "path": "lightestnight.system.serviceresolution/1.1.0-alpha0003",
+      "path": "lightestnight.system.serviceresolution/1.1.0-alpha0004",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "lib/netstandard2.0/LightestNight.System.ServiceResolution.dll",
-        "lightestnight.system.serviceresolution.1.1.0-alpha0003.nupkg.sha512",
+        "lightestnight.system.serviceresolution.1.1.0-alpha0004.nupkg.sha512",
         "lightestnight.system.serviceresolution.nuspec"
       ]
     },
@@ -980,7 +980,7 @@
   },
   "projectFileDependencyGroups": {
     ".NETStandard,Version=v2.0": [
-      "LightestNight.System.ServiceResolution >= 1.1.0-alpha0003",
+      "LightestNight.System.ServiceResolution >= 1.1.0-alpha0004",
       "Microsoft.Extensions.DependencyInjection >= 2.2.0",
       "Microsoft.Extensions.Options.ConfigurationExtensions >= 2.2.0",
       "NETStandard.Library >= 2.0.3",
@@ -1006,15 +1006,13 @@
         "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "/Users/wooderz/.config/NuGet/NuGet.Config"
+        "/Users/wooderz/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "netstandard2.0"
       ],
       "sources": {
-        "http://localhost:5555/v3/index.json": {},
-        "https://api.nuget.org/v3/index.json": {},
-        "https://bart.whenyoumove.com/nuget/wym/": {}
+        "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "netstandard2.0": {
@@ -1032,7 +1030,7 @@
         "dependencies": {
           "LightestNight.System.ServiceResolution": {
             "target": "Package",
-            "version": "[1.1.0-alpha0003, )"
+            "version": "[1.1.0-alpha0004, )"
           },
           "Microsoft.Extensions.DependencyInjection": {
             "target": "Package",

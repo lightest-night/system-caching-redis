@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v2.2",
-    "signature": "5247b3c5430c0e9ddd87c9aebd07a5e5599ffb87"
+    "signature": "b0326cf2b91007c75737e335c76eb0656caf8af3"
   },
   "compilationOptions": {},
   "targets": {
@@ -38,7 +38,7 @@
           }
         }
       },
-      "LightestNight.System.ServiceResolution/1.1.0-alpha0003": {
+      "LightestNight.System.ServiceResolution/1.1.0-alpha0004": {
         "dependencies": {
           "LightestNight.System.Utilities": "0.1.0-alpha0003",
           "Microsoft.Extensions.DependencyInjection": "2.2.0"
@@ -1264,7 +1264,7 @@
       },
       "LightestNight.System.Caching.Redis/1.0.0": {
         "dependencies": {
-          "LightestNight.System.ServiceResolution": "1.1.0-alpha0003",
+          "LightestNight.System.ServiceResolution": "1.1.0-alpha0004",
           "Microsoft.Extensions.DependencyInjection": "2.2.0",
           "Microsoft.Extensions.Options.ConfigurationExtensions": "2.2.0",
           "Newtonsoft.Json": "12.0.2",
@@ -1290,12 +1290,12 @@
       "path": "castle.core/4.4.0",
       "hashPath": "castle.core.4.4.0.nupkg.sha512"
     },
-    "LightestNight.System.ServiceResolution/1.1.0-alpha0003": {
+    "LightestNight.System.ServiceResolution/1.1.0-alpha0004": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-flXANg27dTtSlrqDzICQuh0M+xp0KspWmTjUkKmZefIKHxdkKdr/uywHAOzklkc9c5u5AMEfsjMII3OTIcJceQ==",
-      "path": "lightestnight.system.serviceresolution/1.1.0-alpha0003",
-      "hashPath": "lightestnight.system.serviceresolution.1.1.0-alpha0003.nupkg.sha512"
+      "sha512": "sha512-pDGuUSOOvwLiJA/ICg8AJH7GBD0MRUlmHLgH878+y+EodRcyImbA7grYwbX0Z5Y9QDelFpmS7xp2m751YftFLg==",
+      "path": "lightestnight.system.serviceresolution/1.1.0-alpha0004",
+      "hashPath": "lightestnight.system.serviceresolution.1.1.0-alpha0004.nupkg.sha512"
     },
     "LightestNight.System.Utilities/0.1.0-alpha0003": {
       "type": "package",
