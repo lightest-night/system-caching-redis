@@ -24,4 +24,3 @@ Hooks, utilities and helpers to allow caching to the Redis distributed cache
   
 * `Task Delete<TItem>(object key)`
   * An asynchronous function to call when deleting an item from the cache  
-
