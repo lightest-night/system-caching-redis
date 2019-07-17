@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,12 +36,15 @@ namespace LightestNight.System.Caching.Redis.Tests
             }
         }
         
-        private readonly Mock<IDatabase> _redisDatabaseMoq = new Mock<IDatabase>();
+        private readonly Mock<Set> _setMock = new Mock<Set>();
+        private readonly Mock<Get> _getMock = new Mock<Get>();
+        private readonly Mock<GetByTag> _getByTagMock = new Mock<GetByTag>();
+        private readonly Mock<Remove> _removeMock = new Mock<Remove>();
         private readonly Cache _sut;
 
         public PersistenceTests()
         {
-            _sut = new Cache(() => _redisDatabaseMoq.Object);
+            _sut = new Cache(_setMock.Object, _getMock.Object, _getByTagMock.Object, _removeMock.Object);
         }
 
         [Fact]
@@ -48,61 +52,69 @@ namespace LightestNight.System.Caching.Redis.Tests
         {
             // Arrange
             const string cacheKey = "TestCacheKey";
-            _redisDatabaseMoq.Setup(x => x.StringGetAsync(It.IsAny<RedisKey>(), It.IsAny<CommandFlags>())).ReturnsAsync(RedisValue.EmptyString);
+            _getMock.Setup(get => get(It.IsAny<string>())).ReturnsAsync(JsonConvert.SerializeObject(new TestObject()));
             
             // Act
             await _sut.Get<object>(cacheKey);
             
             // Assert
-            _redisDatabaseMoq.Verify(x => x.StringGetAsync(
-                It.Is<RedisKey>(key => key.ToString().Contains($":{cacheKey}")),
-                It.IsAny<CommandFlags>()),
-                Times.Once);
+            _getMock.Verify(get => get(It.Is<string>(key => key.Contains(cacheKey))), Times.Once);
         }
 
         [Fact]
-        public async Task Should_Save_New_Object()
+        public async Task Should_Save_Object()
         {
             // Arrange
             const string cacheKey = "TestCacheKey";
             
             // Act
-            await _sut.Save(cacheKey, new {});
+            await _sut.Save(cacheKey, new { });
             
             // Assert
-            _redisDatabaseMoq.Verify(x => x.StringSetAsync(
-                    It.Is<RedisKey>(key => key.ToString().Contains($":{cacheKey}")),
-                    It.IsAny<RedisValue>(),
-                    It.IsAny<TimeSpan?>(),
-                    It.IsAny<When>(),
-                    It.IsAny<CommandFlags>()),
-                Times.Once);
+            _setMock.Verify(set => set(It.Is<string>(key => key.Contains(cacheKey)), It.IsAny<string>(), It.IsAny<DateTime?>(), It.IsAny<string[]>()), Times.Once);
         }
-
+        
         [Fact]
-        public async Task Should_Update_Existing_Object()
+        public async Task Should_Not_Save_Null_Object()
         {
             // Arrange
             const string cacheKey = "TestCacheKey";
-            _redisDatabaseMoq.Setup(x => x.StringGetAsync(It.IsAny<RedisKey>(), It.IsAny<CommandFlags>())).ReturnsAsync(RedisValue.EmptyString);
             
             // Act
-            await _sut.Save(cacheKey, "Test Object");
+            await _sut.Save<object>(cacheKey, null);
             
             // Assert
-            _redisDatabaseMoq.Verify(x => x.KeyDeleteAsync(
-                It.Is<RedisKey>(key => key.ToString().Contains($":{cacheKey}")), 
-                It.IsAny<CommandFlags>()), Times.Once);
-            
-            _redisDatabaseMoq.Verify(x => x.StringSetAsync(
-                    It.Is<RedisKey>(key => key.ToString().Contains($":{cacheKey}")),
-                    It.IsAny<RedisValue>(),
-                    It.IsAny<TimeSpan?>(),
-                    It.IsAny<When>(),
-                    It.IsAny<CommandFlags>()),
-                Times.Once);
+            _setMock.Verify(set => set(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateTime?>(), It.IsAny<string[]>()), Times.Never);
         }
 
+        [Fact]
+        public async Task Should_Save_With_Expiry_Date()
+        {
+            // Arrange
+            const string cacheKey = "TestCacheKey";
+            var expiry = DateTime.Now.AddMinutes(30);
+
+            // Act
+            await _sut.Save(cacheKey, new TestObject(), expiry);
+            
+            // Assert
+            _setMock.Verify(set => set(It.Is<string>(key => key.Contains(cacheKey)), It.IsAny<string>(), expiry, It.IsAny<string[]>()), Times.Once);
+        }
+        
+        [Fact]
+        public async Task Should_Save_With_Tags()
+        {
+            // Arrange
+            const string cacheKey = "TestCacheKey";
+            var tags = new[] {"tag1", "tag2"};
+
+            // Act
+            await _sut.Save(cacheKey, new TestObject(), tags: tags);
+            
+            // Assert
+            _setMock.Verify(set => set(It.Is<string>(key => key.Contains(cacheKey)), It.IsAny<string>(), It.IsAny<DateTime?>(), tags), Times.Once);
+        }
+        
         [Fact]
         public async Task Should_Delete_Item_Under_Key()
         {
@@ -113,78 +125,21 @@ namespace LightestNight.System.Caching.Redis.Tests
             await _sut.Delete<object>(cacheKey);
             
             // Assert
-            _redisDatabaseMoq.Verify(x => x.KeyDeleteAsync(It.Is<RedisKey>(key => key.ToString().Contains($":{cacheKey}")),
-                It.IsAny<CommandFlags>()), Times.Once);
+            _removeMock.Verify(remove => remove(It.Is<string>(key => key.Contains(cacheKey))), Times.Once);
         }
 
         [Fact]
-        public async Task Should_Add_Item_To_List()
+        public async Task Should_Get_Items_Under_Tag()
         {
             // Arrange
-            const string cacheKey = "TestCacheKey";
-            var testObject = new TestObject();
+            const string tag = "TestTag";
+            _getByTagMock.Setup(x => x(It.IsAny<string>())).ReturnsAsync(new List<string> {JsonConvert.SerializeObject(new TestObject())});
             
             // Act
-            await _sut.AddToList(cacheKey, testObject);
+            await _sut.GetByTag<TestObject>(tag);
             
             // Assert
-            _redisDatabaseMoq.Verify(x => x.ListRightPushAsync(It.Is<RedisKey>(key => key.ToString().Contains($":{cacheKey}")),
-                It.Is<RedisValue>(value => value.ToString() == JsonConvert.SerializeObject(testObject)),
-                It.IsAny<When>(),
-                It.IsAny<CommandFlags>()), Times.Once);
-        }
-
-        [Fact]
-        public async Task Should_Remove_Item_From_List_At_Index()
-        {
-            // Arrange
-            const string cacheKey = "TestCacheKey";
-            _redisDatabaseMoq.Setup(x => x.ListGetByIndexAsync(It.IsAny<RedisKey>(), It.IsAny<long>(), It.IsAny<CommandFlags>()))
-                .ReturnsAsync(RedisValue.EmptyString);
-            
-            // Act
-            await _sut.RemoveFromListAt<TestObject>(cacheKey, 1);
-            
-            // Assert
-            _redisDatabaseMoq.Verify(x => x.ListRemoveAsync(It.Is<RedisKey>(key => key.ToString().Contains($":{cacheKey}")),
-                    It.IsAny<RedisValue>(),
-                    It.IsAny<long>(),
-                    It.IsAny<CommandFlags>()),
-                Times.Once);
-        }
-
-        [Fact]
-        public async Task Should_Remove_Item_From_A_List()
-        {
-            // Arrange
-            const string cacheKey = "TestCacheKey";
-            
-            // Act
-            await _sut.RemoveFromList(cacheKey, new TestObject());
-            
-            // Assert
-            _redisDatabaseMoq.Verify(x => x.ListRemoveAsync(It.Is<RedisKey>(key => key.ToString().Contains($":{cacheKey}")),
-                    It.IsAny<RedisValue>(),
-                    It.IsAny<long>(),
-                    It.IsAny<CommandFlags>()),
-                Times.Once);
-        }
-
-        [Fact]
-        public async Task Should_Get_List()
-        {
-            // Arrange
-            const string cacheKey = "TestCacheKey";
-            _redisDatabaseMoq.Setup(x => x.ListLengthAsync(It.IsAny<RedisKey>(), It.IsAny<CommandFlags>())).ReturnsAsync(1);
-            _redisDatabaseMoq.Setup(x => x.ListGetByIndexAsync(It.IsAny<RedisKey>(), It.IsAny<long>(), It.IsAny<CommandFlags>()))
-                .ReturnsAsync((RedisValue)JsonConvert.SerializeObject(new TestObject()));
-
-            // Act
-            var result = (await _sut.GetList<TestObject>(cacheKey)).ToArray();
-            
-            // Assert
-            result.Length.ShouldBe(1);
-            result[0].ShouldBe(new TestObject());
+            _getByTagMock.Verify(getByTag => getByTag(tag), Times.Once);
         }
     }
 }

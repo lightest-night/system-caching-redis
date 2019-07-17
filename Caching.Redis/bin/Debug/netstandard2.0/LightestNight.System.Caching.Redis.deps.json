@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETStandard,Version=v2.0/",
-    "signature": "6897dc4729963b71871cc84b14dbe289056a2443"
+    "signature": "246e64bfcbec382b16d8702ff4a2a1fef04653b9"
   },
   "compilationOptions": {},
   "targets": {
@@ -9,14 +9,36 @@
     ".NETStandard,Version=v2.0/": {
       "LightestNight.System.Caching.Redis/1.0.0": {
         "dependencies": {
+          "LightestNight.System.ServiceResolution": "1.1.0-alpha0003",
           "Microsoft.Extensions.DependencyInjection": "2.2.0",
           "Microsoft.Extensions.Options.ConfigurationExtensions": "2.2.0",
           "NETStandard.Library": "2.0.3",
           "Newtonsoft.Json": "12.0.2",
-          "StackExchange.Redis": "2.0.601"
+          "StackExchange.Redis": "2.0.601",
+          "TagCache.Redis": "1.0.0.2"
         },
         "runtime": {
           "LightestNight.System.Caching.Redis.dll": {}
+        }
+      },
+      "LightestNight.System.ServiceResolution/1.1.0-alpha0003": {
+        "dependencies": {
+          "LightestNight.System.Utilities": "0.1.0-alpha0003",
+          "Microsoft.Extensions.DependencyInjection": "2.2.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/LightestNight.System.ServiceResolution.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "LightestNight.System.Utilities/0.1.0-alpha0003": {
+        "runtime": {
+          "lib/netstandard2.0/LightestNight.System.Utilities.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "Microsoft.Extensions.Configuration/2.2.0": {
@@ -238,6 +260,17 @@
             "fileVersion": "4.6.26606.5"
           }
         }
+      },
+      "TagCache.Redis/1.0.0.2": {
+        "dependencies": {
+          "StackExchange.Redis": "2.0.601"
+        },
+        "runtime": {
+          "lib/net45/TagCache.Redis.dll": {
+            "assemblyVersion": "1.0.0.2",
+            "fileVersion": "1.0.0.2"
+          }
+        }
       }
     }
   },
@@ -246,6 +279,20 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "LightestNight.System.ServiceResolution/1.1.0-alpha0003": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-flXANg27dTtSlrqDzICQuh0M+xp0KspWmTjUkKmZefIKHxdkKdr/uywHAOzklkc9c5u5AMEfsjMII3OTIcJceQ==",
+      "path": "lightestnight.system.serviceresolution/1.1.0-alpha0003",
+      "hashPath": "lightestnight.system.serviceresolution.1.1.0-alpha0003.nupkg.sha512"
+    },
+    "LightestNight.System.Utilities/0.1.0-alpha0003": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ZojqGyux1BqxS1ohbyRwKKnxeWnrSOMdCe1PQlDDWyUAcziFrfNO93rv8aOpmtu9lDihDAGUHlejuFXjtjDITA==",
+      "path": "lightestnight.system.utilities/0.1.0-alpha0003",
+      "hashPath": "lightestnight.system.utilities.0.1.0-alpha0003.nupkg.sha512"
     },
     "Microsoft.Extensions.Configuration/2.2.0": {
       "type": "package",
@@ -400,6 +447,13 @@
       "sha512": "sha512-rckdhLJtzQ3EI+0BGuq7dUVtCSnerqAoAmL3S6oMRZ4VMZTL3Rq9DS8IDW57c6PYVebA4O0NbSA1BDvyE18UMA==",
       "path": "system.threading.tasks.extensions/4.5.1",
       "hashPath": "system.threading.tasks.extensions.4.5.1.nupkg.sha512"
+    },
+    "TagCache.Redis/1.0.0.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-7AqzW3uCQJg0bMXGQmFQnXhgtejXRN9MKRfGUIhecms6ijR2cUfYFH9LcPT46l6QIZAqejbk3Vd7VwtNVJEWYg==",
+      "path": "tagcache.redis/1.0.0.2",
+      "hashPath": "tagcache.redis.1.0.0.2.nupkg.sha512"
     }
   }
 }
