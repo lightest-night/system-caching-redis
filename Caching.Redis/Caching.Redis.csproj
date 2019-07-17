@@ -25,10 +25,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="LightestNight.System.ServiceResolution" Version="1.1.0-alpha0003" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
       <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
       <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
       <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
+      <PackageReference Include="TagCache.Redis" Version="1.0.0.2" />
     </ItemGroup>
 
 </Project>

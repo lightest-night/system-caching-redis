@@ -2,6 +2,28 @@
   "version": 3,
   "targets": {
     ".NETStandard,Version=v2.0": {
+      "LightestNight.System.ServiceResolution/1.1.0-alpha0003": {
+        "type": "package",
+        "dependencies": {
+          "LightestNight.System.Utilities": "0.1.0-alpha0003",
+          "Microsoft.Extensions.DependencyInjection": "2.2.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/LightestNight.System.ServiceResolution.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/LightestNight.System.ServiceResolution.dll": {}
+        }
+      },
+      "LightestNight.System.Utilities/0.1.0-alpha0003": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/LightestNight.System.Utilities.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/LightestNight.System.Utilities.dll": {}
+        }
+      },
       "Microsoft.Extensions.Configuration/2.2.0": {
         "type": "package",
         "dependencies": {
@@ -259,10 +281,46 @@
         "runtime": {
           "lib/netstandard2.0/System.Threading.Tasks.Extensions.dll": {}
         }
+      },
+      "TagCache.Redis/1.0.0.2": {
+        "type": "package",
+        "dependencies": {
+          "StackExchange.Redis": "1.0.394"
+        },
+        "compile": {
+          "lib/net45/TagCache.Redis.dll": {}
+        },
+        "runtime": {
+          "lib/net45/TagCache.Redis.dll": {}
+        }
       }
     }
   },
   "libraries": {
+    "LightestNight.System.ServiceResolution/1.1.0-alpha0003": {
+      "sha512": "flXANg27dTtSlrqDzICQuh0M+xp0KspWmTjUkKmZefIKHxdkKdr/uywHAOzklkc9c5u5AMEfsjMII3OTIcJceQ==",
+      "type": "package",
+      "path": "lightestnight.system.serviceresolution/1.1.0-alpha0003",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/netstandard2.0/LightestNight.System.ServiceResolution.dll",
+        "lightestnight.system.serviceresolution.1.1.0-alpha0003.nupkg.sha512",
+        "lightestnight.system.serviceresolution.nuspec"
+      ]
+    },
+    "LightestNight.System.Utilities/0.1.0-alpha0003": {
+      "sha512": "ZojqGyux1BqxS1ohbyRwKKnxeWnrSOMdCe1PQlDDWyUAcziFrfNO93rv8aOpmtu9lDihDAGUHlejuFXjtjDITA==",
+      "type": "package",
+      "path": "lightestnight.system.utilities/0.1.0-alpha0003",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/netstandard2.0/LightestNight.System.Utilities.dll",
+        "lightestnight.system.utilities.0.1.0-alpha0003.nupkg.sha512",
+        "lightestnight.system.utilities.nuspec"
+      ]
+    },
     "Microsoft.Extensions.Configuration/2.2.0": {
       "sha512": "Be1LEgclOQthHN7tksm79bGbXNJ0yuewEBiIzPSePwDwt2AGqLLx5iXv6BfjVZGztxKQCngz+X8IRw/kOz+CwA==",
       "type": "package",
@@ -906,15 +964,29 @@
         "useSharedDesignerContext.txt",
         "version.txt"
       ]
+    },
+    "TagCache.Redis/1.0.0.2": {
+      "sha512": "7AqzW3uCQJg0bMXGQmFQnXhgtejXRN9MKRfGUIhecms6ijR2cUfYFH9LcPT46l6QIZAqejbk3Vd7VwtNVJEWYg==",
+      "type": "package",
+      "path": "tagcache.redis/1.0.0.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net45/TagCache.Redis.dll",
+        "tagcache.redis.1.0.0.2.nupkg.sha512",
+        "tagcache.redis.nuspec"
+      ]
     }
   },
   "projectFileDependencyGroups": {
     ".NETStandard,Version=v2.0": [
+      "LightestNight.System.ServiceResolution >= 1.1.0-alpha0003",
       "Microsoft.Extensions.DependencyInjection >= 2.2.0",
       "Microsoft.Extensions.Options.ConfigurationExtensions >= 2.2.0",
       "NETStandard.Library >= 2.0.3",
       "Newtonsoft.Json >= 12.0.2",
-      "StackExchange.Redis >= 2.0.601"
+      "StackExchange.Redis >= 2.0.601",
+      "TagCache.Redis >= 1.0.0.2"
     ]
   },
   "packageFolders": {
@@ -956,6 +1028,10 @@
     "frameworks": {
       "netstandard2.0": {
         "dependencies": {
+          "LightestNight.System.ServiceResolution": {
+            "target": "Package",
+            "version": "[1.1.0-alpha0003, )"
+          },
           "Microsoft.Extensions.DependencyInjection": {
             "target": "Package",
             "version": "[2.2.0, )"
@@ -977,6 +1053,10 @@
           "StackExchange.Redis": {
             "target": "Package",
             "version": "[2.0.601, )"
+          },
+          "TagCache.Redis": {
+            "target": "Package",
+            "version": "[1.0.0.2, )"
           }
         },
         "imports": [
@@ -986,5 +1066,17 @@
         "warn": true
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'TagCache.Redis 1.0.0.2' was restored using '.NETFramework,Version=v4.6.1' instead of the project target framework '.NETStandard,Version=v2.0'. This package may not be fully compatible with your project.",
+      "libraryId": "TagCache.Redis",
+      "targetGraphs": [
+        ".NETStandard,Version=v2.0"
+      ]
+    }
+  ]
 }
