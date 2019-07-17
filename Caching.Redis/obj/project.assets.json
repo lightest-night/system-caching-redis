@@ -1006,13 +1006,15 @@
         "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "/Users/wooderz/.nuget/NuGet/NuGet.Config"
+        "/Users/wooderz/.config/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "netstandard2.0"
       ],
       "sources": {
-        "https://api.nuget.org/v3/index.json": {}
+        "http://localhost:5555/v3/index.json": {},
+        "https://api.nuget.org/v3/index.json": {},
+        "https://bart.whenyoumove.com/nuget/wym/": {}
       },
       "frameworks": {
         "netstandard2.0": {

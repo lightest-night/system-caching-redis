@@ -10,6 +10,8 @@ Hooks, utilities and helpers to allow caching to the Redis distributed cache
   
 * Other Containers
   * Register an instance of `RedisCacheProvider` as a Singleton
+  * Register an instance of `Cache` as a Singleton
+  * Register all the delegates in the `Delegates` class appropriately as Transient instances.
 
 ##### Usage
 * `Task Save<TItem>(object key, TItem objectToSave, DateTime? expires, params string[] tags)`

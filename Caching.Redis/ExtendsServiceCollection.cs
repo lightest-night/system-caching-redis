@@ -16,7 +16,8 @@ namespace LightestNight.System.Caching.Redis
             connectionAction?.Invoke(connectionManager);
 
             return services.AddSingleton(_ => new RedisCacheProvider(connectionManager))
-                .AddExposedDelegates();
+                .AddExposedDelegates()
+                .AddSingleton<Cache>();
         }
     }
 }
