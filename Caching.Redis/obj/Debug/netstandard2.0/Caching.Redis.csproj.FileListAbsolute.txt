@@ -1,9 +1,0 @@
-/Users/wooderz/Development/Lightest Night/System/Caching.Redis/Caching.Redis/bin/Debug/netstandard2.0/LightestNight.System.Caching.Redis.deps.json
-/Users/wooderz/Development/Lightest Night/System/Caching.Redis/Caching.Redis/bin/Debug/netstandard2.0/LightestNight.System.Caching.Redis.dll
-/Users/wooderz/Development/Lightest Night/System/Caching.Redis/Caching.Redis/bin/Debug/netstandard2.0/LightestNight.System.Caching.Redis.pdb
-/Users/wooderz/Development/Lightest Night/System/Caching.Redis/Caching.Redis/obj/Debug/netstandard2.0/Caching.Redis.csprojAssemblyReference.cache
-/Users/wooderz/Development/Lightest Night/System/Caching.Redis/Caching.Redis/obj/Debug/netstandard2.0/Caching.Redis.csproj.CoreCompileInputs.cache
-/Users/wooderz/Development/Lightest Night/System/Caching.Redis/Caching.Redis/obj/Debug/netstandard2.0/Caching.Redis.AssemblyInfoInputs.cache
-/Users/wooderz/Development/Lightest Night/System/Caching.Redis/Caching.Redis/obj/Debug/netstandard2.0/Caching.Redis.AssemblyInfo.cs
-/Users/wooderz/Development/Lightest Night/System/Caching.Redis/Caching.Redis/obj/Debug/netstandard2.0/LightestNight.System.Caching.Redis.dll
-/Users/wooderz/Development/Lightest Night/System/Caching.Redis/Caching.Redis/obj/Debug/netstandard2.0/LightestNight.System.Caching.Redis.pdb
