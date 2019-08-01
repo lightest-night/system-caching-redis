@@ -1,84 +1,44 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using LightestNight.System.Utilities.Extensions;
-using Newtonsoft.Json;
+using LightestNight.System.Caching.Redis.TagCache;
 
 namespace LightestNight.System.Caching.Redis
 {
-    public class Cache
+    public class Cache : ICache
     {
-        private readonly Set _set;
-        private readonly Get _get;
-        private readonly GetByTag _getByTag;
-        private readonly Remove _remove;
+        private readonly IRedisCacheProvider _cacheProvider;
 
-        public Cache(Set set, Get get, GetByTag getByTag, Remove remove)
+        public Cache(IRedisCacheProvider cacheProvider)
         {
-            _set = set;
-            _get = get;
-            _getByTag = getByTag;
-            _remove = remove;
+            _cacheProvider = cacheProvider;
         }
 
-        /// <summary>
-        /// Saves an item to the cache
-        /// </summary>
-        /// <param name="key">The key to save the item under</param>
-        /// <param name="objectToSave">The object to save</param>
-        /// <param name="expires">If set, the expiry of this item; Default is 1 year</param>
-        /// <param name="tags">Any tags to assign this item</param>
-        /// <typeparam name="TItem">The type of the object being saved</typeparam>
-        public async Task Save<TItem>(object key, TItem objectToSave, DateTime? expires = default, params string[] tags)
+        /// <inheritdoc cref="ICache.Save{TItem}" />
+        public async Task Save<TItem>(string key, TItem item, DateTime? expiry = default, params string[] tags)
         {
-            if (objectToSave != null)
+            if (item != null)
             {
-                var cacheKey = GenerateKey<TItem>(key.ToString());
-                var cacheItem = JsonConvert.SerializeObject(objectToSave);
-                await _set(cacheKey, cacheItem, expires, tags);
+                var cacheKey = GenerateKey<TItem>(key);
+                await _cacheProvider.Set(cacheKey, item, expiry, tags);
             }
         }
-
-        /// <summary>
-        /// Gets an item from the cache
-        /// </summary>
-        /// <param name="key">The key to get the item</param>
-        /// <typeparam name="TItem">The type of the object being retrieved</typeparam>
-        /// <returns>The instance of <typeparamref name="TItem" /> found in the cache. If nothing found returns default</returns>
-        public async Task<TItem> Get<TItem>(object key)
+        
+        /// <inheritdoc cref="ICache.Get{TItem}" />
+        public async Task<TItem> Get<TItem>(string key)
         {
-            var cacheItem = await _get(GenerateKey<TItem>(key.ToString()));
-            return cacheItem == default
-                ? default
-                : JsonConvert.DeserializeObject<TItem>(cacheItem);
+            var cacheItem = await _cacheProvider.Get<TItem>(GenerateKey<TItem>(key));
+            return cacheItem;
         }
 
-        /// <summary>
-        /// Gets items from the cache by their associated tag
-        /// </summary>
-        /// <param name="tag">The tag to find the items under</param>
-        /// <typeparam name="TItem">The type of the object being retrieved</typeparam>
-        /// <returns>A collection of <typeparamref name="TItem" /> instances found in the cache. If nothing found returns an empty collection</returns>
-        public async Task<IEnumerable<TItem>> GetByTag<TItem>(string tag)
-        {
-            var cacheItems = await _getByTag(tag);
-            return cacheItems.IsNullOrEmpty() 
-                ? Enumerable.Empty<TItem>() 
-                : cacheItems.Select(JsonConvert.DeserializeObject<TItem>);
-        }
-        
-        /// <summary>
-        /// Deletes the cache item under the given key
-        /// </summary>
-        /// <param name="key">The key to delete the item under</param>
-        /// <typeparam name="TItem">The type of the object being deleted. If the item is a list, the type of the items within the list</typeparam>
-        public async Task Delete<TItem>(object key)
-        {
-            var cacheKey = GenerateKey<TItem>(key.ToString());
-            await _remove(cacheKey);
-        }
-        
+        /// <inheritdoc cref="ICache.GetByTag{TItem}" />
+        public Task<IEnumerable<TItem>> GetByTag<TItem>(string tag)
+            => _cacheProvider.GetByTag<TItem>(tag);
+
+        /// <inheritdoc cref="ICache.Delete{TItem}" />
+        public async Task Delete<TItem>(string key)
+            => await _cacheProvider.Remove(GenerateKey<TItem>(key));
+
         private static string GenerateKey<T>(string key)
             => $"{typeof(T).Name}:{key}";
     }

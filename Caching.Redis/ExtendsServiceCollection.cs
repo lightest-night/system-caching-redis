@@ -1,7 +1,6 @@
 using System;
-using LightestNight.System.ServiceResolution;
+using LightestNight.System.Caching.Redis.TagCache;
 using Microsoft.Extensions.DependencyInjection;
-using TagCache.Redis;
 
 namespace LightestNight.System.Caching.Redis
 {
@@ -9,15 +8,14 @@ namespace LightestNight.System.Caching.Redis
     {
         public static IServiceCollection AddRedisCache(this IServiceCollection services, Action<RedisConnectionManager> connectionAction = null)
         {
-            if (services.BuildServiceProvider().GetService<RedisCacheProvider>() != null)
+            if (services.BuildServiceProvider().GetService<IRedisCacheProvider>() != null)
                 return services;
             
             var connectionManager = new RedisConnectionManager();
             connectionAction?.Invoke(connectionManager);
 
-            return services.AddSingleton(_ => new RedisCacheProvider(connectionManager))
-                .AddExposedDelegates()
-                .AddSingleton<Cache>();
+            return services.AddSingleton<IRedisCacheProvider>(_ => new RedisCacheProvider(connectionManager))
+                .AddSingleton(typeof(ICache), typeof(Cache));
         }
     }
 }
