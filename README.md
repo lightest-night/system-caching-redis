@@ -9,9 +9,8 @@ Hooks, utilities and helpers to allow caching to the Redis distributed cache
   * Use the provided `services.AddRedisCache(Action<RedisConnectionManager> options)` method
   
 * Other Containers
-  * Register an instance of `RedisCacheProvider` as a Singleton
-  * Register an instance of `Cache` as a Singleton
-  * Register all the delegates in the `Delegates` class appropriately as Transient instances.
+  * Register an instance of `IRedisCacheProvider` as a Singleton
+  * Register an instance of `ICache` as a Singleton
 
 ##### Usage
 * `Task Save<TItem>(object key, TItem objectToSave, DateTime? expires, params string[] tags)`
