@@ -50,6 +50,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             // Act
             Thread.Sleep(2500);
             await _sut.RemoveExpiredKeys();
+            Thread.Sleep(500);
             result = await _sut.Get<string>(key);
 
             // Assert
@@ -90,6 +91,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
 
             // Check it hasn't expired already
             await _sut.RemoveExpiredKeys();
+            Thread.Sleep(500);
             result = await _sut.Get<string>(key);
             result.ShouldNotBeNull();
             result.ShouldBe(value);
@@ -107,6 +109,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             // 40 more winks - it'll expire in this time
             Thread.Sleep(4500);
             await _sut.RemoveExpiredKeys();
+            Thread.Sleep(500);
             result = await _sut.Get<string>(key);
             
             // Assert

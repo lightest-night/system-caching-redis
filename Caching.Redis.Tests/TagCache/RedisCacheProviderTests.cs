@@ -252,7 +252,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             const string value2 = "Test Value 2";
             const string value3 = "Test Value 3";
             var tag = $"{Guid.NewGuid()}_tag";
-            var expiry = DateTime.Now.AddSeconds(3);
+            var expiry = DateTime.Now.AddSeconds(30);
 
             await Task.WhenAll(cache.Set(key1, value1, expiry, tag), cache.Set(key2, value2, expiry, tag), cache.Set(key3, value3, expiry, tag));
             
