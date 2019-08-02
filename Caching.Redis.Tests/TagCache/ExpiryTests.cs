@@ -16,7 +16,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         
         public ExpiryTests()
         {
-            var redis = new RedisConnectionManager();
+            var redis = new RedisConnectionManager($"{ConnectionHelper.IntegrationTestHost}:{ConnectionHelper.Port}", password: ConnectionHelper.Password, useSsl: ConnectionHelper.UseSsl);
             _config = new CacheConfiguration(redis);
             _sut = new RedisCacheProvider(_config)
             {
@@ -30,7 +30,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             // Arrange
             var key = $"TagCacheTests:{nameof(Should_Remove_Expired_Item_From_Cache)}";
             const string value = "Test Value";
-            var expires = DateTime.UtcNow.AddSeconds(3);
+            var expires = DateTime.Now.AddSeconds(3);
 
             const string tag1 = "tag1";
             const string tag2 = "tag2";
@@ -63,8 +63,8 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             
             var key = $"TagCacheTests:{nameof(Should_Remove_Expired_Tags_From_Cache)}";
             const string value = "Test Value";
-            var expires = DateTime.UtcNow.AddSeconds(3);
-
+            var expires = DateTime.Now.AddSeconds(5);
+            
             const string tag1 = "tag1001";
             const string tag2 = "tag1002";
 
@@ -86,8 +86,9 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             
             // 40 winks
             Thread.Sleep(1000);
-            
+
             // Check it hasn't expired already
+            await _sut.RemoveExpiredKeys();
             result = await _sut.Get<string>(key);
             result.ShouldNotBeNull();
             result.ShouldBe(value);
@@ -103,7 +104,8 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             
             // Act
             // 40 more winks - it'll expire in this time
-            Thread.Sleep(2500);
+            Thread.Sleep(4500);
+            await _sut.RemoveExpiredKeys();
             result = await _sut.Get<string>(key);
             
             // Assert

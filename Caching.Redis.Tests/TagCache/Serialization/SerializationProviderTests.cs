@@ -21,8 +21,8 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache.Serialization
         }
         
         protected abstract ISerializationProvider GetSerializer();
-        
-        protected TCacheItem CreateTestObject()
+
+        private TCacheItem CreateTestObject()
         {
             var value = new TCacheItem
             {

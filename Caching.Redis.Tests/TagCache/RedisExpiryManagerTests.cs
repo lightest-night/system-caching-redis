@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using LightestNight.System.Caching.Redis.TagCache;
 using LightestNight.System.Caching.Redis.TagCache.Expiry;
+using LightestNight.System.Caching.Redis.Tests.TagCache.Helpers;
 using Shouldly;
 using Xunit;
 
@@ -11,15 +12,14 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
     public class RedisExpiryManagerTests
     {
         private readonly string _setKey;
-        private readonly RedisConnectionManager _redisConnectionManager;
         private readonly RedisClient _redisClient;
         private readonly RedisExpiryManager _sut;
 
         public RedisExpiryManagerTests()
         {
-            _redisConnectionManager = new RedisConnectionManager("localhost");
-            _redisClient = new RedisClient(_redisConnectionManager, 0);
-            _sut = new RedisExpiryManager(new CacheConfiguration(_redisConnectionManager));
+            var redis = new RedisConnectionManager($"{ConnectionHelper.IntegrationTestHost}:{ConnectionHelper.Port}", password: ConnectionHelper.Password, useSsl: ConnectionHelper.UseSsl);
+            _redisClient = new RedisClient(redis);
+            _sut = new RedisExpiryManager(new CacheConfiguration(redis));
 
             _setKey = _sut.SetKey;
         }
@@ -32,7 +32,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             const string key = "expiringkey";
             
             // Act & Assert
-            Should.NotThrow(() => _sut.SetKeyExpiry(_redisClient, key, DateTime.UtcNow.AddYears(-1)));
+            Should.NotThrow(() => _sut.SetKeyExpiry(_redisClient, key, DateTime.Now.AddYears(-1)));
         }
 
         [Fact]
@@ -44,9 +44,9 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             const string key2 = "expiringkey.2";
             const string key3 = "expiringkey.3";
 
-            var minus10Date = DateTime.UtcNow.AddYears(-1).AddMinutes(-10);
-            var minus20Date = DateTime.UtcNow.AddYears(-1).AddMinutes(-20);
-            var minus30Date = DateTime.UtcNow.AddYears(-1).AddMinutes(-30);
+            var minus10Date = DateTime.Now.AddYears(-1).AddMinutes(-10);
+            var minus20Date = DateTime.Now.AddYears(-1).AddMinutes(-20);
+            var minus30Date = DateTime.Now.AddYears(-1).AddMinutes(-30);
 
             await Task.WhenAll(_sut.SetKeyExpiry(_redisClient, key1, minus10Date), _sut.SetKeyExpiry(_redisClient, key2, minus20Date), _sut.SetKeyExpiry(_redisClient, key3, minus30Date));
             

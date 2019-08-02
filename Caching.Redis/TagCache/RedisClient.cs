@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,11 +10,13 @@ namespace LightestNight.System.Caching.Redis.TagCache
 {
     public class RedisClient
     {
-        private const string RootName = "_redisCache";
+        private const string RootName = "_lightestNight:tagCache";
+        private const string CacheKeysByTagKey = "_cacheKeysByTag";
+        private const string CacheTagsByKeyKey = "_cacheTagsByKey";
 
         private readonly int _db;
         private readonly RedisConnectionManager _connectionManager;
-
+        
         public RedisClient(RedisConnectionManager connectionManager, int db)
             : this(connectionManager)
         {
@@ -33,8 +36,24 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// <param name="expiry">Sets the expiry of this item</param>
         public Task<bool> Set(string key, RedisValue value, DateTime? expiry)
         {
+            TimeSpan? ttl = null;
+            if (expiry.HasValue)
+            {
+                var expiryValue = expiry.Value;
+                if (expiryValue.Kind == DateTimeKind.Utc)
+                {
+                    var utcNow = DateTime.UtcNow;
+                    ttl = expiryValue > utcNow ? expiryValue - utcNow : utcNow.AddSeconds(1) - utcNow;
+                }
+                else
+                {
+                    var now = DateTime.Now;
+                    ttl = expiryValue > now ? expiryValue - now : now.AddSeconds(1) - now;
+                }
+            }
+            
             var connection = _connectionManager.GetConnection();
-            return connection.GetDatabase(_db).StringSetAsync(key, value, expiry?.TimeOfDay);
+            return connection.GetDatabase(_db).StringSetAsync(key, value, ttl);
         }
 
         /// <summary>
@@ -82,12 +101,11 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// </summary>
         /// <param name="key">The key to add</param>
         /// <param name="tags">The tags to add the key to</param>
-        public async Task<bool> AddKeyToTags(string key, IEnumerable<string> tags)
+        public async Task AddKeyToTags(string key, IEnumerable<string> tags)
         {
             var enumeratedTags = tags as string[] ?? tags.ToArray();
-            if (key == null || enumeratedTags.IsNullOrEmpty()) 
-                return true;
-            
+            if (key == null || enumeratedTags.IsNullOrEmpty()) return;
+
             var connection = _connectionManager.GetConnection();
             var transaction = connection.GetDatabase(_db).CreateTransaction();
 
@@ -100,8 +118,6 @@ namespace LightestNight.System.Caching.Redis.TagCache
             }
                 
             await transaction.ExecuteAsync();
-
-            return true;
         }
 
         /// <summary>
@@ -109,16 +125,15 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// </summary>
         /// <param name="key">The key to remove</param>
         /// <param name="tags">The tags to remove the key from</param>
-        public async Task<bool> RemoveKeyFromTags(string key, IEnumerable<string> tags)
+        public async Task<bool> RemoveKeyFromTags(string key, params string[] tags)
         {
-            var enumeratedTags = tags as string[] ?? tags.ToArray();
-            if (enumeratedTags.IsNullOrEmpty()) 
+            if (tags.IsNullOrEmpty())
                 return true;
             
             var connection = _connectionManager.GetConnection();
             var transaction = connection.GetDatabase(_db).CreateTransaction();
 
-            foreach (var tag in enumeratedTags)
+            foreach (var tag in tags)
             {
 #pragma warning disable 4014
                 // Don't await this, the task will get executed when the transaction is executed
@@ -147,6 +162,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
 #pragma warning disable 4014
             // Don't await this, the task will get executed when the transaction is executed
             transaction.KeyDeleteAsync(KeyTagsListKey(key));
+            
 #pragma warning restore 4014
 
             if (!tags.IsNullOrEmpty())
@@ -187,7 +203,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
 
             return result.Select(r => !r.IsNullOrEmpty ? r.ToString() : null);
         }
-
+        
         /// <summary>
         /// Sets the given value to a sorted set by date
         /// </summary>
@@ -197,7 +213,8 @@ namespace LightestNight.System.Caching.Redis.TagCache
         public Task<bool> SetTimeSet(string setKey, string value, DateTime date)
         {
             var connection = _connectionManager.GetConnection();
-            return connection.GetDatabase(_db).SortedSetAddAsync(setKey, value, Helpers.TimeToRank(date));
+            var rank = Helpers.TimeToRank(date);
+            return connection.GetDatabase(_db).SortedSetAddAsync(setKey, value, rank);
         }
 
         /// <summary>
@@ -222,7 +239,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         {
             var connection = _connectionManager.GetConnection();
             var timeAsRank = Helpers.TimeToRank(maxDate);
-            var keys = await connection.GetDatabase(_db).SortedSetRangeByScoreAsync(setKey, start: 0, stop: timeAsRank);
+            var keys = await connection.GetDatabase(_db).SortedSetRangeByScoreAsync(setKey, start: -1, stop: timeAsRank);
             return keys.Select(k => k.ToString());
         }
 
@@ -241,17 +258,104 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// </summary>
         /// <param name="key">The key the object is stored under</param>
         /// <param name="expiry">The date and time the object will expire</param>
-        /// <returns></returns>
         public Task Expire(string key, DateTime expiry)
         {
             var connection = _connectionManager.GetConnection();
             return connection.GetDatabase(_db).KeyExpireAsync(key, expiry.TimeOfDay);
         }
 
+        /// <summary>
+        /// Determines whether an item with the given key exists in the cache
+        /// </summary>
+        /// <param name="key">The Key to check</param>
+        /// <returns>Boolean denoting presence of item with key</returns>
+        public Task<bool> Exists(string key)
+        {
+            var connection = _connectionManager.GetConnection();
+            return connection.GetDatabase(_db).KeyExistsAsync(key);
+        }
+        
+        /// <summary>
+        /// Finds all keys that have since expired and make sure they are removed from the tag lists
+        /// </summary>
+        /// <remarks>Uses the KEYS & SCAN Redis methods - not to be used lightly, only execute this is absolutely necessary</remarks>
+        public async Task<IEnumerable<string>> RemoveExpiredKeysFromTags()
+        {
+            var pattern = $"{RootName}:{CacheKeysByTagKey}:*";
+            var servers = _connectionManager.GetServers();
+
+            var removedKeys = new List<string>();
+
+            foreach (var server in servers)
+            {
+                var tagKeys = server.Keys(pattern: pattern);
+                foreach (var tagKey in tagKeys)
+                {
+                    var tagParts = tagKey.ToString().Split(':');
+                    if (tagParts.Length < 4)
+                        continue;
+
+                    var tag = string.Join(":", tagParts.Skip(3));
+                    var cacheKeys = await GetKeysForTag(tag);
+                    foreach (var cacheKey in cacheKeys)
+                    {
+                        if (await Exists(cacheKey))
+                            continue;
+                        
+                        removedKeys.Add(cacheKey);
+                        await RemoveKeyFromTags(cacheKey, tag);
+                    }
+                }
+            }
+
+            return removedKeys;
+        }
+
+        /// <summary>
+        /// Utilises parallelism to find all keys that have since expired and make sure the tags associated with them are removed
+        /// </summary>
+        /// <remarks>Uses the KEYS & SCAN Redis methods - not to be used lightly, only execute this is absolutely necessary</remarks>
+        public async Task<IEnumerable<string>> RemoveTagsFromExpiredKeys()
+        {
+            var pattern = $"{RootName}:{CacheTagsByKeyKey}:*";
+            var servers = _connectionManager.GetServers();
+
+            var keys = new List<string>();
+            
+            foreach (var server in servers)
+            {
+                var keyTags = server.Keys(pattern: pattern);
+                foreach (var keyTag in keyTags)
+                {
+                    var keyParts = keyTag.ToString().Split(':');
+                    if (keyParts.Length < 3)
+                        continue;
+
+                    var key = string.Join(":", keyParts.Skip(3));
+                    if (await Exists(key))
+                        continue;
+                    
+                    keys.Add(key);
+                    await RemoveTagsForKey(key);
+                }
+            }
+
+            return keys;
+        }
+
         private static string TagKeysListKey(string tag)
-            => $"{RootName}:_cacheKeysByTag:{tag}";
+            => $"{RootName}:{CacheKeysByTagKey}:{tag}";
 
         private static string KeyTagsListKey(string key)
-            => $"{RootName}:_cacheTagsByKey:{key}";
+            => $"{RootName}:{CacheTagsByKeyKey}:{key}";
+    }
+
+    public static class ExtendsIEnumerable
+    {
+        public static IEnumerable<T> TakeLast<T>(this IEnumerable<T> source, int n)
+        {
+            var enumeratedSource = source as T[] ?? source.ToArray();
+            return enumeratedSource.Skip(Math.Max(0, enumeratedSource.Length - n));
+        }
     }
 }

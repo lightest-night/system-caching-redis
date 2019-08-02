@@ -24,16 +24,6 @@ namespace LightestNight.System.Caching.Redis.TagCache
         Task<IEnumerable<T>> GetByTag<T>(string tag);
 
         /// <summary>
-        /// Sets the given item into the cache with the given key, expiry and tag
-        /// </summary>
-        /// <param name="key">The key to set the item under</param>
-        /// <param name="value">The item to set into the cache</param>
-        /// <param name="expiry">The expiry date of the item</param>
-        /// <param name="tag">A tag to associate the item with</param>
-        /// <typeparam name="T">The type of the item</typeparam>
-        Task Set<T>(string key, T value, DateTime? expiry = null, string tag = null);
-
-        /// <summary>
         /// Sets the given item into the cache with the given key, expiry and tags
         /// </summary>
         /// <param name="key">The key to set the item under</param>
@@ -75,6 +65,13 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// </summary>
         /// <param name="tag">The tag to remove items by</param>
         Task RemoveByTag(string tag);
+
+        /// <summary>
+        /// Determines if an item exists within the cache with the given key
+        /// </summary>
+        /// <param name="key">The key to check existence for</param>
+        /// <returns>Boolean denoting existence of an item with the given key</returns>
+        Task<bool> Exists(string key);
 
         /// <summary>
         /// If the version of Redis does not support expiry subscriptions, this removes any expired keys

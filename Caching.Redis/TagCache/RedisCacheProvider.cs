@@ -56,7 +56,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// <inheritdoc cref="IRedisCacheProvider.GetByTag{T}" />
         public async Task<IEnumerable<T>> GetByTag<T>(string tag)
         {
-            var keys = (await _redisTagManager.GetKeysForTag(_client, tag))?.ToArray();
+            var keys = (await RedisTagManager.GetKeysForTag(_client, tag))?.ToArray();
             if (keys.IsNullOrEmpty())
             {
                 await Log(nameof(GetByTag), tag, "Not Found");
@@ -80,10 +80,6 @@ namespace LightestNight.System.Caching.Redis.TagCache
             return result;
         }
 
-        /// <inheritdoc cref="IRedisCacheProvider.Set{T}(string,T,Nullable{DateTime},string)" />
-        public Task Set<T>(string key, T value, DateTime? expiry = null, string tag = null)
-            => Set(key, value, expiry, tag != null ? new[] {tag} : null);
-
         /// <inheritdoc cref="IRedisCacheProvider.Set{T}(string,T,string[])" />
         public Task Set<T>(string key, T value, params string[] tags)
             => Set(key, value, null, tags);
@@ -92,9 +88,16 @@ namespace LightestNight.System.Caching.Redis.TagCache
         public async Task Set<T>(string key, T value, DateTime? expiry = null, params string[] tags)
         {
             await Log(nameof(Set), key, null);
-
             if (await _redisCacheItemProvider.Set(_client, key, value, expiry, tags))
-                await _redisTagManager.UpdateTags(_client, key, tags);
+            {
+                if (tags.Length > 0)
+                {
+                    var updateTagsTask = _redisTagManager.UpdateTags(_client, key, tags);
+                    var setKeyExpiryTask = /*expiry.HasValue ? _redisExpiryManager.SetKeyExpiry(_client, key, expiry.Value) : */Task.CompletedTask;
+
+                    await Task.WhenAll(updateTagsTask, setKeyExpiryTask);
+                }
+            }
         }
 
         /// <inheritdoc cref="IRedisCacheProvider.Remove(string)" />
@@ -107,36 +110,49 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// <inheritdoc cref="IRedisCacheProvider.Remove(string[])" />
         public async Task Remove(params string[] keys)
         {
-            await Log(nameof(Remove), string.Join(",", keys), null);
-            await _client.Remove(keys);
-            await _redisTagManager.RemoveTags(_client, keys);
-            await _redisExpiryManager.RemoveKeyExpiry(_client, keys);
+            if (keys.Length > 0)
+            {
+                await Log(nameof(Remove), string.Join(",", keys), null);
+                await _client.Remove(keys);
+                await _redisTagManager.RemoveTags(_client, keys);
+                await _redisExpiryManager.RemoveKeyExpiry(_client, keys);
+            }
         }
         
         /// <inheritdoc cref="IRedisCacheProvider.Remove(IRedisCacheItem)" />
         public async Task Remove(IRedisCacheItem cacheItem)
         {
             await Log(nameof(Remove), cacheItem.Key, "Removed via the `Remove(IRedisCacheItem)` method");
-            await Task.WhenAll(_client.Remove(cacheItem.Key), _redisTagManager.RemoveTags(_client, cacheItem));
+            await Task.WhenAll(_client.Remove(cacheItem.Key), RedisTagManager.RemoveTags(_client, cacheItem), _redisExpiryManager.RemoveKeyExpiry(_client, cacheItem.Key));
         }
 
         /// <inheritdoc cref="IRedisCacheProvider.RemoveByTag" />
         public async Task RemoveByTag(string tag)
         {
             await Log(nameof(RemoveByTag), tag, null);
-            var keys = (await _redisTagManager.GetKeysForTag(_client, tag)).ToArray();
+            var keys = (await RedisTagManager.GetKeysForTag(_client, tag)).ToArray();
             if (!keys.IsNullOrEmpty())
                 await Remove(keys);
+        }
+
+        /// <inheritdoc cref="IRedisCacheProvider.Exists" />
+        public async Task<bool> Exists(string key)
+        {
+            await Log(nameof(Exists), key, null);
+            return await _client.Exists(key);
         }
 
         /// <inheritdoc cref="IRedisCacheProvider.RemoveExpiredKeys" />
         public async Task<IEnumerable<string>> RemoveExpiredKeys()
         {
-            var maxDate = DateTime.UtcNow.AddMinutes(CacheConfiguration.MinutesToRemoveAfterExpiry);
-            var keys = (await _redisExpiryManager.GetExpiredKeys(_client, maxDate)).ToArray();
-            await Remove(keys);
+            var removedKeys = new List<string>();
 
-            return keys;
+            var maxDate = DateTime.Now.AddMinutes(CacheConfiguration.MinutesToRemoveAfterExpiry);
+            removedKeys.AddRange(await _redisExpiryManager.GetExpiredKeys(_client, maxDate));
+            removedKeys.AddRange(await _client.RemoveExpiredKeysFromTags());
+            removedKeys.AddRange(await _client.RemoveTagsFromExpiredKeys());
+
+            return removedKeys.Distinct();
         }
 
         private static void SetupExpiryHandler(CacheConfiguration configuration, RedisCacheProvider redisCacheProvider)
@@ -163,7 +179,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
 
         private async Task<bool> CacheItemIsValid(IRedisCacheItem item)
         {
-            if (!item.Expiry.HasValue || item.Expiry.Value >= DateTime.UtcNow) 
+            if (!item.Expiry.HasValue || item.Expiry.Value >= DateTime.Now) 
                 return true;
             
             await Remove(item);

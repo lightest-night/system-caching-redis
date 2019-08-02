@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using LightestNight.System.Caching.Redis.TagCache;
+using LightestNight.System.Caching.Redis.Tests.TagCache.Helpers;
 using Shouldly;
 using StackExchange.Redis;
 using Xunit;
@@ -9,7 +10,8 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
 {
     public class RedisClientTests
     {
-        private readonly RedisClient _sut = new RedisClient(new RedisConnectionManager("localhost"), 0);
+        private static readonly RedisConnectionManager Redis = new RedisConnectionManager($"{ConnectionHelper.IntegrationTestHost}:{ConnectionHelper.Port}", password: ConnectionHelper.Password, useSsl: ConnectionHelper.UseSsl);
+        private readonly RedisClient _sut = new RedisClient(Redis);
 
         [Fact]
         public void Should_Add_Successfully()
@@ -17,9 +19,10 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             // Arrange
             const string key = "TagCacheTests:Add";
             const string value = "Test Value";
+            var expiry = DateTime.Now.AddSeconds(3);
             
             // Act & Assert
-            Should.NotThrow(() => _sut.Set(key, value, DateTime.UtcNow.AddSeconds(5)));
+            Should.NotThrow(async () => await _sut.Set(key, value, expiry));
         }
 
         [Fact]
@@ -41,7 +44,8 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             // Arrange
             const string key = "TagCacheTests:Add";
             const string value = "Test Value";
-            await _sut.Set(key, value, DateTime.UtcNow.AddSeconds(10));
+            var expiry = DateTime.Now.AddSeconds(3);
+            await _sut.Set(key, value, expiry);
 
             // Arrange
             var result = await _sut.Get(key);
@@ -57,7 +61,8 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             // Arrange
             const string key = "TagCacheTests:Add";
             const string value = "Test Value";
-            await _sut.Set(key, value, DateTime.UtcNow.AddSeconds(10));
+            var expiry = DateTime.Now.AddSeconds(3);
+            await _sut.Set(key, value, expiry);
             
             // Act
             await _sut.Remove(key);
@@ -77,8 +82,9 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             const string value1 = "Test Value 1";
             const string value2 = "Test Value 2";
             const string value3 = "Test Value 3";
+            var expiry = DateTime.Now.AddSeconds(3);
 
-            await Task.WhenAll(_sut.Set(key1, value1, DateTime.UtcNow.AddSeconds(10)), _sut.Set(key2, value2, DateTime.UtcNow.AddSeconds(10)), _sut.Set(key3, value3, DateTime.UtcNow.AddSeconds(10)));
+            await Task.WhenAll(_sut.Set(key1, value1, expiry), _sut.Set(key2, value2, expiry), _sut.Set(key3, value3, expiry));
             
             // Act
             await _sut.Remove(new[] {key1, key2, key3});
