@@ -65,7 +65,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             
             var key = $"TagCacheTests:{nameof(Should_Remove_Expired_Tags_From_Cache)}";
             const string value = "Test Value";
-            var expires = DateTime.Now.AddSeconds(5);
+            var expires = DateTime.Now.AddSeconds(30);
             
             const string tag1 = "tag1001";
             const string tag2 = "tag1002";
@@ -87,11 +87,11 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             tagsForKey.Any(t => t == tag2).ShouldBeTrue();
             
             // 40 winks
-            Thread.Sleep(1000);
+            Thread.Sleep(10000);
 
             // Check it hasn't expired already
             await _sut.RemoveExpiredKeys();
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
             result = await _sut.Get<string>(key);
             result.ShouldNotBeNull();
             result.ShouldBe(value);
@@ -107,9 +107,9 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             
             // Act
             // 40 more winks - it'll expire in this time
-            Thread.Sleep(4500);
+            Thread.Sleep(35000);
             await _sut.RemoveExpiredKeys();
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
             result = await _sut.Get<string>(key);
             
             // Assert
