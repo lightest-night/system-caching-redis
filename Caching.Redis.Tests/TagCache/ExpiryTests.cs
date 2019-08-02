@@ -49,6 +49,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             
             // Act
             Thread.Sleep(2500);
+            await _sut.RemoveExpiredKeys();
             result = await _sut.Get<string>(key);
 
             // Assert
