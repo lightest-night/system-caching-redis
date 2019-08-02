@@ -7,11 +7,6 @@ namespace LightestNight.System.Caching.Redis.TagCache
         private const int DefaultTimeoutMilliseconds = 1000;
 
         /// <summary>
-        /// The host to use when connecting to Redis
-        /// </summary>
-        public string Host { get; set; } = DefaultHost;
-
-        /// <summary>
         /// The redis database index to connect to
         /// </summary>
         public int DbIndex { get; set; } = DefaultDbIndex;

@@ -34,7 +34,7 @@ namespace LightestNight.System.Caching.Redis.TagCache.Expiry
         private void SubscribeToExpiryEvents()
         {
             _subscriber = new RedisSubscriberConnectionManager(_configuration.RedisClientConfiguration.RedisConnectionManager).GetConnection();
-            _subscriber.Subscribe(new RedisChannel("*:expire", RedisChannel.PatternMode.Pattern), SubscriberMessageReceived);
+            _subscriber.Subscribe(new RedisChannel("*:expired", RedisChannel.PatternMode.Pattern), SubscriberMessageReceived);
         }
 
         private void SubscriberMessageReceived(RedisChannel redisChannel, RedisValue redisValue)

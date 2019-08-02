@@ -60,7 +60,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
             if (keys.IsNullOrEmpty())
             {
                 await Log(nameof(GetByTag), tag, "Not Found");
-                return null;
+                return Enumerable.Empty<T>();
             }
 
             var result = new ConcurrentBag<T>();
@@ -160,16 +160,17 @@ namespace LightestNight.System.Caching.Redis.TagCache
             if (_redisExpiryHandlersByHost == null)
                 _redisExpiryHandlersByHost = new ConcurrentDictionary<string, RedisExpiryHandler>();
 
-            if (_redisExpiryHandlersByHost.ContainsKey(configuration.RedisClientConfiguration.Host)) 
-                return;
-            
-            var handler = new RedisExpiryHandler(configuration)
-            {
-                RemoveMethod = redisCacheProvider.Remove, 
-                LogMethod = redisCacheProvider.Log
-            };
+            var redisConnectionManager = configuration.RedisClientConfiguration.RedisConnectionManager;
+            var host = redisConnectionManager.Host ?? redisConnectionManager.ConnectionString;
 
-            _redisExpiryHandlersByHost.TryAdd(configuration.RedisClientConfiguration.Host, handler);
+            if (_redisExpiryHandlersByHost.ContainsKey(host))
+                return;
+
+            _redisExpiryHandlersByHost.TryAdd(host, new RedisExpiryHandler(configuration)
+            {
+                RemoveMethod = redisCacheProvider.Remove,
+                LogMethod = redisCacheProvider.Log
+            });
         }
 
         private Task Log(string method, string arg, string message)

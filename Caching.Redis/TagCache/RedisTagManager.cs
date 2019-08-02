@@ -54,7 +54,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         {
             return keys.ForEach(async key =>
             {
-                var tags = await GetTagsForKey(client, key);
+                var tags = (await GetTagsForKey(client, key))?.ToArray();
                 var cacheItem = _cacheItemFactory.Create(key, tags);
 
                 await RemoveKeyFromTags(client, cacheItem);

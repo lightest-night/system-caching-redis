@@ -10,7 +10,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
 {
     public class RedisClientTests
     {
-        private static readonly RedisConnectionManager Redis = new RedisConnectionManager($"{ConnectionHelper.IntegrationTestHost}:{ConnectionHelper.Port}", password: ConnectionHelper.Password, useSsl: ConnectionHelper.UseSsl);
+        private static readonly RedisConnectionManager Redis = new RedisConnectionManager(ConnectionHelper.IntegrationTestHost, ConnectionHelper.Port, password: ConnectionHelper.Password, useSsl: ConnectionHelper.UseSsl);
         private readonly RedisClient _sut = new RedisClient(Redis);
 
         [Fact]

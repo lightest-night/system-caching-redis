@@ -16,7 +16,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         
         public ExpiryTests()
         {
-            var redis = new RedisConnectionManager($"{ConnectionHelper.IntegrationTestHost}:{ConnectionHelper.Port}", password: ConnectionHelper.Password, useSsl: ConnectionHelper.UseSsl);
+            var redis = new RedisConnectionManager(ConnectionHelper.IntegrationTestHost, ConnectionHelper.Port, password: ConnectionHelper.Password, useSsl: ConnectionHelper.UseSsl);
             _config = new CacheConfiguration(redis);
             _sut = new RedisCacheProvider(_config)
             {
