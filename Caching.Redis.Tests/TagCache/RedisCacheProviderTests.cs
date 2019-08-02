@@ -98,7 +98,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             var cache = new RedisCacheProvider(_redis) {Logger = new TestRedisLogger()};
             var key = $"{Guid.NewGuid()}TagCacheTests:Add";
             const string value = "Test Value";
-            var expiry = DateTime.Now.AddSeconds(3);
+            var expiry = DateTime.Now.AddSeconds(30);
             await cache.Set(key, value, expiry);
             
             // Act
@@ -121,7 +121,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
                 Property2 = "Bar",
                 Property3 = 11
             };
-            var expiry = DateTime.Now.AddSeconds(3);
+            var expiry = DateTime.Now.AddSeconds(30);
             await cache.Set(key, value, expiry);
             
             // Act
@@ -141,7 +141,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             var cache = new RedisCacheProvider(_redis) {Logger = new TestRedisLogger()};
             var key = $"{Guid.NewGuid()}TagCacheTests:Add";
             const string value = "Test Value";
-            var expiry = DateTime.Now.AddSeconds(3);
+            var expiry = DateTime.Now.AddSeconds(30);
             await cache.Set(key, value, expiry);
             
             // Act
@@ -225,7 +225,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             var cache = new RedisCacheProvider(_redis) {Logger = new TestRedisLogger()};
             var key = $"{Guid.NewGuid()}TagCacheTests:Add";
             const string value = "Test Value";
-            var expiry = DateTime.Now.AddSeconds(3);
+            var expiry = DateTime.Now.AddSeconds(30);
 
             var tag1 = $"{Guid.NewGuid()}_tag1";
             var tag2 = $"{Guid.NewGuid()}_tag2";
