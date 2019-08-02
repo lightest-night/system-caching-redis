@@ -28,6 +28,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         public async Task Should_Remove_Expired_Item_From_Cache()
         {
             // Arrange
+            await _sut.RemoveExpiredKeys();
             var key = $"TagCacheTests:{nameof(Should_Remove_Expired_Item_From_Cache)}";
             const string value = "Test Value";
             var expires = DateTime.Now.AddSeconds(3);
@@ -61,65 +62,33 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         public async Task Should_Remove_Expired_Tags_From_Cache()
         {
             // Arrange
+            await _sut.RemoveExpiredKeys();
             var client = new RedisClient(_config.RedisClientConfiguration.RedisConnectionManager);
             
             var key = $"TagCacheTests:{nameof(Should_Remove_Expired_Tags_From_Cache)}";
             const string value = "Test Value";
-            var expires = DateTime.Now.AddSeconds(30);
+            var expires = DateTime.Now.AddSeconds(2);
             
             const string tag1 = "tag1001";
             const string tag2 = "tag1002";
 
             await _sut.Set(key, value, expires, tag1, tag2);
             
-            // Check everything has been setup correctly
-            var result = await _sut.Get<string>(key);
-            result.ShouldNotBeNull();
-            result.ShouldBe(value);
-
-            var keysForTag1 = (await client.GetKeysForTag(tag1)).ToArray();
-            keysForTag1.ShouldNotBeNull();
-            keysForTag1.Any(k => k == key).ShouldBeTrue();
-
-            var tagsForKey = (await client.GetTagsForKey(key)).ToArray();
-            tagsForKey.ShouldNotBeNull();
-            tagsForKey.Any(t => t == tag1).ShouldBeTrue();
-            tagsForKey.Any(t => t == tag2).ShouldBeTrue();
-            
-            // 40 winks
-            Thread.Sleep(10000);
-
-            // Check it hasn't expired already
-            await _sut.RemoveExpiredKeys();
-            Thread.Sleep(1000);
-            result = await _sut.Get<string>(key);
-            result.ShouldNotBeNull();
-            result.ShouldBe(value);
-
-            keysForTag1 = (await client.GetKeysForTag(tag1)).ToArray();
-            keysForTag1.ShouldNotBeNull();
-            keysForTag1.Any(k => k == key).ShouldBeTrue();
-
-            tagsForKey = (await client.GetTagsForKey(key)).ToArray();
-            tagsForKey.ShouldNotBeNull();
-            tagsForKey.Any(t => t == tag1).ShouldBeTrue();
-            tagsForKey.Any(t => t == tag2).ShouldBeTrue();
+            // Forty Winks - Let the item expire
+            Thread.Sleep(3500);
             
             // Act
-            // 40 more winks - it'll expire in this time
-            Thread.Sleep(35000);
             await _sut.RemoveExpiredKeys();
-            Thread.Sleep(1000);
-            result = await _sut.Get<string>(key);
+            var result = await _sut.Get<string>(key);
             
             // Assert
             result.ShouldBeNull();
 
-            keysForTag1 = (await client.GetKeysForTag(tag1)).ToArray();
+            var keysForTag1 = (await client.GetKeysForTag(tag1)).ToArray();
             keysForTag1.ShouldNotBeNull();
             keysForTag1.Any(k => k == key).ShouldBeFalse();
 
-            tagsForKey = (await client.GetTagsForKey(key)).ToArray();
+            var tagsForKey = (await client.GetTagsForKey(key)).ToArray();
             tagsForKey.ShouldNotBeNull();
             tagsForKey.Any(t => t == tag1).ShouldBeFalse();
             tagsForKey.Any(t => t == tag2).ShouldBeFalse();
