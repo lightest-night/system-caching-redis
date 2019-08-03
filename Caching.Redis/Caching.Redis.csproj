@@ -25,9 +25,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="LightestNight.System.ServiceResolution" Version="1.1.0-alpha0004" />
-      <PackageReference Include="LightestNight.System.Utilities" Version="0.1.0-alpha0004" />
+      <PackageReference Include="LightestNight.System.Utilities" Version="1.0.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
+      <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="2.2.0" />
       <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
       <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
       <PackageReference Include="StackExchange.Redis" Version="2.0.601" />

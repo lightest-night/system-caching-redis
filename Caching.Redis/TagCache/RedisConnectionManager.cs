@@ -25,7 +25,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// The connection string that was used to connect to redis
         /// </summary>
         public string ConnectionString { get; }
-
+        
         public RedisConnectionManager(string connectionString)
         {
             ConnectionString = connectionString ?? "localhost";

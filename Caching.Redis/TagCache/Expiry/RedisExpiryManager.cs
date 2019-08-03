@@ -1,45 +1,54 @@
 using System;
-using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
 
 namespace LightestNight.System.Caching.Redis.TagCache.Expiry
 {
-    public class RedisExpiryManager
+    public class RedisExpiryManager : IHostedService, IDisposable
     {
-        /// <summary>
-        /// The key used to store the expiry keys in the cache
-        /// </summary>
-        public string SetKey { get; }
+        private readonly IRedisCacheProvider _redisCacheProvider;
 
-        public RedisExpiryManager(CacheConfiguration configuration)
+        private Timer _timer;
+
+        public RedisExpiryManager(IRedisCacheProvider redisCacheProvider)
         {
-            SetKey = $"{configuration.RootNamespace}:_cacheExpiryKeys";
+            _redisCacheProvider = redisCacheProvider;
         }
 
-        /// <summary>
-        /// Sets the given expiry date to the given key
-        /// </summary>
-        /// <param name="client">The <see cref="RedisClient" /> to use to connect to Redis</param>
-        /// <param name="key">The key to set the expiry to</param>
-        /// <param name="expiryDate">The expiry to set</param>
-        public Task SetKeyExpiry(RedisClient client, string key, DateTime expiryDate)
-            => client.SetTimeSet(SetKey, key, expiryDate);
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            // Start the expiration runner immediately, and then run every 6 hours.
+            // The manual expiration process utilises the Redis commands KEYS & SCAN
+            // This can be quite processor intensive depending on the database size, hopefully running only 4 times a day
+            // will mitigate this
+            _timer = new Timer(
+                async e => await RemoveExpiredKeys(cancellationToken),
+                null,
+                TimeSpan.Zero,
+                TimeSpan.FromHours(6)
+                );
 
-        /// <summary>
-        /// Removes the expiry from the given keys
-        /// </summary>
-        /// <param name="client">The <see cref="RedisClient" /> to use to connect to Redis</param>
-        /// <param name="keys">The keys to remove the expiry from</param>
-        public Task RemoveKeyExpiry(RedisClient client, params string[] keys)
-            => client.RemoveTimeSet(SetKey, keys);
+            return Task.CompletedTask;
+        }
 
-        /// <summary>
-        /// Gets the keys that have expired
-        /// </summary>
-        /// <param name="client">The <see cref="RedisClient" /> to use to connect to Redis</param>
-        /// <param name="maxDate">The maximum expiry date to get expired keys before</param>
-        /// <returns>A collection of expired keys</returns>
-        public Task<IEnumerable<string>> GetExpiredKeys(RedisClient client, DateTime maxDate)
-            => client.GetFromTimeSet(SetKey, maxDate);
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            _timer?.Change(Timeout.Infinite, 0);
+            return Task.CompletedTask;
+        }
+
+        public void Dispose()
+        {
+            _timer?.Dispose();
+        }
+
+        private async Task RemoveExpiredKeys(CancellationToken cancellationToken)
+        {
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                await _redisCacheProvider.RemoveExpiredKeys();
+            }
+        }
     }
 }

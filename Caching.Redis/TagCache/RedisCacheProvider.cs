@@ -16,7 +16,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         private readonly RedisClient _client;
         private readonly RedisCacheItemProvider _redisCacheItemProvider;
         private readonly RedisTagManager _redisTagManager;
-        private readonly RedisExpiryManager _redisExpiryManager;
+        private readonly RedisExpiryProvider _redisExpiryProvider;
 
         /// <summary>
         /// An instance of <see cref="IRedisCacheLogger" /> used to log errors and informational messages
@@ -30,7 +30,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         {
             _client = new RedisClient(configuration.RedisClientConfiguration.RedisConnectionManager, configuration.RedisClientConfiguration.DbIndex);
             _redisTagManager = new RedisTagManager(configuration.CacheItemFactory);
-            _redisExpiryManager = new RedisExpiryManager(configuration);
+            _redisExpiryProvider = new RedisExpiryProvider(configuration);
             _redisCacheItemProvider = new RedisCacheItemProvider(configuration.Serializer, configuration.CacheItemFactory);
 
             SetupExpiryHandler(configuration, this);
@@ -93,7 +93,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
                 if (tags.Length > 0)
                 {
                     var updateTagsTask = _redisTagManager.UpdateTags(_client, key, tags);
-                    var setKeyExpiryTask = /*expiry.HasValue ? _redisExpiryManager.SetKeyExpiry(_client, key, expiry.Value) : */Task.CompletedTask;
+                    var setKeyExpiryTask = /*expiry.HasValue ? _redisExpiryProvider.SetKeyExpiry(_client, key, expiry.Value) : */Task.CompletedTask;
 
                     await Task.WhenAll(updateTagsTask, setKeyExpiryTask);
                 }
@@ -115,7 +115,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
                 await Log(nameof(Remove), string.Join(",", keys), null);
                 await _client.Remove(keys);
                 await _redisTagManager.RemoveTags(_client, keys);
-                await _redisExpiryManager.RemoveKeyExpiry(_client, keys);
+                await _redisExpiryProvider.RemoveKeyExpiry(_client, keys);
             }
         }
         
@@ -123,7 +123,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         public async Task Remove(IRedisCacheItem cacheItem)
         {
             await Log(nameof(Remove), cacheItem.Key, "Removed via the `Remove(IRedisCacheItem)` method");
-            await Task.WhenAll(_client.Remove(cacheItem.Key), RedisTagManager.RemoveTags(_client, cacheItem), _redisExpiryManager.RemoveKeyExpiry(_client, cacheItem.Key));
+            await Task.WhenAll(_client.Remove(cacheItem.Key), RedisTagManager.RemoveTags(_client, cacheItem), _redisExpiryProvider.RemoveKeyExpiry(_client, cacheItem.Key));
         }
 
         /// <inheritdoc cref="IRedisCacheProvider.RemoveByTag" />
@@ -148,7 +148,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
             var removedKeys = new List<string>();
 
             var maxDate = DateTime.Now.AddMinutes(CacheConfiguration.MinutesToRemoveAfterExpiry);
-            removedKeys.AddRange(await _redisExpiryManager.GetExpiredKeys(_client, maxDate));
+            removedKeys.AddRange(await _redisExpiryProvider.GetExpiredKeys(_client, maxDate));
             removedKeys.AddRange(await _client.RemoveExpiredKeysFromTags());
             removedKeys.AddRange(await _client.RemoveTagsFromExpiredKeys());
 

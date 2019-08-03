@@ -13,13 +13,13 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
     {
         private readonly string _setKey;
         private readonly RedisClient _redisClient;
-        private readonly RedisExpiryManager _sut;
+        private readonly RedisExpiryProvider _sut;
 
         public RedisExpiryManagerTests()
         {
             var redis = new RedisConnectionManager(ConnectionHelper.IntegrationTestHost, ConnectionHelper.Port, password: ConnectionHelper.Password, useSsl: ConnectionHelper.UseSsl);
             _redisClient = new RedisClient(redis);
-            _sut = new RedisExpiryManager(new CacheConfiguration(redis));
+            _sut = new RedisExpiryProvider(new CacheConfiguration(redis));
 
             _setKey = _sut.SetKey;
         }
