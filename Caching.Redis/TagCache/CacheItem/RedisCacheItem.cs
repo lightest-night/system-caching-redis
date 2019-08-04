@@ -4,22 +4,30 @@ using System.Collections.Generic;
 namespace LightestNight.System.Caching.Redis.TagCache.CacheItem
 {
     [Serializable]
-    public class RedisCacheItem : IRedisCacheItem
+    public class RedisCacheItem
     {
-        /// <inheritdoc cref="IRedisCacheItem.Key" />
+        /// <summary>
+        /// The key to store the item under
+        /// </summary>
         public string Key { get; set; }
         
-        /// <inheritdoc cref="IRedisCacheItem.Tags" />
+        /// <summary>
+        /// Any tags to attach to the item
+        /// </summary>
         public string[] Tags { get; set; }
         
-        /// <inheritdoc cref="IRedisCacheItem.Expiry" />
+        /// <summary>
+        /// The date and time the item will expire and be removed from the cache
+        /// </summary>
         public DateTime? Expiry { get; set; }
     }
 
     [Serializable]
-    public class RedisCacheItem<T> : RedisCacheItem, IRedisCacheItem<T>
+    public class RedisCacheItem<T> : RedisCacheItem
     {
-        /// <inheritdoc cref="IRedisCacheItem{T}.Value" />
+        /// <summary>
+        /// The value to store in the item
+        /// </summary>
         public T Value { get; set; }
     }
 }

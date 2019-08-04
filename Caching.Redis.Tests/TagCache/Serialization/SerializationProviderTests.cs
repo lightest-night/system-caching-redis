@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 namespace LightestNight.System.Caching.Redis.Tests.TagCache.Serialization
 {
     public abstract class SerializationProviderTests<TCacheItem>
-        where TCacheItem : class, IRedisCacheItem<TestObject>, new()
+        where TCacheItem : RedisCacheItem<TestObject>, new()
     {
         private readonly ITestOutputHelper _output;
 

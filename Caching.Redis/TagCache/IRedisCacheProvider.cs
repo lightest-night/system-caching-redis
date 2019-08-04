@@ -58,7 +58,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// Removes the given item from the cache
         /// </summary>
         /// <param name="item">The item to remove</param>
-        Task Remove(IRedisCacheItem item);
+        Task Remove(RedisCacheItem item);
 
         /// <summary>
         /// Removes the items in the cache associated to the given tag

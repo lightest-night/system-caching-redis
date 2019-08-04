@@ -10,7 +10,7 @@ namespace LightestNight.System.Caching.Redis.TagCache.CacheItem
         /// <param name="key">The cache key to save the item under</param>
         /// <param name="tags">Any tags to attach to the item</param>
         /// <returns>A new instance of <see cref="IRedisCacheItem" /></returns>
-        IRedisCacheItem Create(string key, params string[] tags);
+        RedisCacheItem Create(string key, params string[] tags);
 
         /// <summary>
         /// Creates a new <see cref="IRedisCacheItem{T}" />
@@ -21,6 +21,6 @@ namespace LightestNight.System.Caching.Redis.TagCache.CacheItem
         /// <param name="tags">Any tags to attach to the item</param>
         /// <typeparam name="T">The type of the object being stored</typeparam>
         /// <returns>A new instance of <see cref="IRedisCacheItem{T}" /></returns>
-        IRedisCacheItem<T> Create<T>(string key, T value, DateTime? expiry = null, params string[] tags);
+        RedisCacheItem<T> Create<T>(string key, T value, DateTime? expiry = null, params string[] tags);
     }
 }
