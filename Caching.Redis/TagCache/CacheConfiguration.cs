@@ -25,7 +25,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// <summary>
         /// The <see cref="ISerializationProvider" /> to use when serializing data for Redis
         /// </summary>
-        public ISerializationProvider Serializer { get; set; } = new BinarySerializationProvider();
+        public ISerializationProvider Serializer { get; set; } = new JsonSerializationProvider();
         
         /// <summary>
         /// The <see cref="IRedisCacheItemFactory" /> to use
