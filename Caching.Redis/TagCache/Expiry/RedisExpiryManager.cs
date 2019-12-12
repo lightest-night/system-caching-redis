@@ -9,7 +9,7 @@ namespace LightestNight.System.Caching.Redis.TagCache.Expiry
     {
         private readonly IRedisCacheProvider _redisCacheProvider;
 
-        private Timer _timer;
+        private Timer? _timer;
 
         public RedisExpiryManager(IRedisCacheProvider redisCacheProvider)
         {

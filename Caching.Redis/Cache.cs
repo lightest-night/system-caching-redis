@@ -15,29 +15,21 @@ namespace LightestNight.System.Caching.Redis
         }
 
         /// <inheritdoc cref="ICache.Save{TItem}" />
-        public async Task Save<TItem>(string key, TItem item, DateTime? expiry = default, params string[] tags)
-        {
-            if (item != null)
-            {
-                var cacheKey = GenerateKey<TItem>(key);
-                await _cacheProvider.Set(cacheKey, item, expiry, tags);
-            }
-        }
-        
+        public Task Save<TItem>(string key, TItem item, DateTime? expiry = null, params string[]? tags)
+            where TItem : notnull
+            => _cacheProvider.Set(GenerateKey<TItem>(key), item, expiry, tags);
+
         /// <inheritdoc cref="ICache.Get{TItem}" />
-        public async Task<TItem> Get<TItem>(string key)
-        {
-            var cacheItem = await _cacheProvider.Get<TItem>(GenerateKey<TItem>(key));
-            return cacheItem;
-        }
+        public Task<TItem> Get<TItem>(string key)
+            => _cacheProvider.Get<TItem>(GenerateKey<TItem>(key));
 
         /// <inheritdoc cref="ICache.GetByTag{TItem}" />
         public Task<IEnumerable<TItem>> GetByTag<TItem>(string tag)
             => _cacheProvider.GetByTag<TItem>(tag);
 
         /// <inheritdoc cref="ICache.Delete{TItem}" />
-        public async Task Delete<TItem>(string key)
-            => await _cacheProvider.Remove(GenerateKey<TItem>(key));
+        public Task Delete<TItem>(string key)
+            => _cacheProvider.Remove(GenerateKey<TItem>(key));
 
         private static string GenerateKey<T>(string key)
             => $"{typeof(T).Name}:{key}";

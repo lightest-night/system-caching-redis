@@ -55,7 +55,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             
             // Assert
             result.ShouldNotBeNull();
-            result.Length.ShouldBe(2);
+            result?.Length.ShouldBe(2);
             result.ShouldNotContain(key1, $"{key1} should not exist");
             result.ShouldContain(key2, $"{key2} should exist");
             result.ShouldContain(key3, $"{key3} should exist");
@@ -74,7 +74,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
                 _sut.SetKeyExpiry(_redisClient, key2, new DateTime(2015, 1, 1, 12, 1, 2)),
                 _sut.SetKeyExpiry(_redisClient, key3, new DateTime(2020, 1, 1, 12, 1, 3)));
 
-            var keys = (await _sut.GetExpiredKeys(_redisClient, new DateTime(2020, 1, 1, 12, 1, 5)))?.ToArray();
+            var keys = (await _sut.GetExpiredKeys(_redisClient, new DateTime(2020, 1, 1, 12, 1, 5))).ToArray();
             keys.ShouldNotBeNull();
             keys.ShouldContain(key1, $"{key1} should exist");
             keys.ShouldContain(key2, $"{key2} should exist");

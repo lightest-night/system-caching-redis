@@ -5,7 +5,7 @@ namespace LightestNight.System.Caching.Redis
         /// <summary>
         /// The host to connect to the cache
         /// </summary>
-        public string Host { get; set; }
+        public string Host { get; set; } = string.Empty;
         
         /// <summary>
         /// The port to connect to the cache
@@ -15,7 +15,7 @@ namespace LightestNight.System.Caching.Redis
         /// <summary>
         /// The password to connect to the cache
         /// </summary>
-        public string Password { get; set; }
+        public string? Password { get; set; }
         
         /// <summary>
         /// Denotes whether to use SSL when connecting to the cache

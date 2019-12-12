@@ -1,5 +1,7 @@
+image: Visual Studio 2019
+
 install:
-  - choco install GitVersion.Portable -y
+  - choco install gitversion.portable --version 4.0.0 -y
 
 pull_requests:
   do_not_increment_build_number: true
@@ -39,21 +41,12 @@ test_script:
   - dotnet test --no-build --no-restore
 
 after_test:
-  - dotnet pack -c Release -o ../packages -p:PackageVersion=%GitVersion_NuGetVersion%
+  - dotnet pack -c Release -o ./packages -p:PackageVersion=%GitVersion_NuGetVersion%
   - ps: Get-ChildItem packages\*.nupkg | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
 
 deploy:
   - provider: NuGet
     api_key:
       secure: msDwO0JAo+DsuDtqwM+dkmEiAEe8xEVNJKkVmWmm9HdheHfSlU7BAqGvS1KvrkKf
-    artifact: /.*\.nupkg/
-    on:
-      branch: develop
-
-  - provider: NuGet
-    api_key:
-      secure: msDwO0JAo+DsuDtqwM+dkmEiAEe8xEVNJKkVmWmm9HdheHfSlU7BAqGvS1KvrkKf
     skip_symbols: true
     artifact: /.*\.nupkg/
-    on:
-      branch: master

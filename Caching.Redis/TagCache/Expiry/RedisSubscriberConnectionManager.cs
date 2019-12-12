@@ -4,7 +4,7 @@ namespace LightestNight.System.Caching.Redis.TagCache.Expiry
 {
     public class RedisSubscriberConnectionManager
     {
-        private volatile ISubscriber _connection;
+        private volatile ISubscriber? _connection;
         private readonly object _connectionLock = new object();
         private readonly RedisConnectionManager _connectionManager;
 
@@ -17,7 +17,7 @@ namespace LightestNight.System.Caching.Redis.TagCache.Expiry
         /// Gets a subscriber to the current Redis connection
         /// </summary>
         /// <returns>A connected instance of <see cref="ISubscriber" /></returns>
-        public ISubscriber GetConnection()
+        public ISubscriber? GetConnection()
         {
             var connection = _connection;
             if (connection != null) 
@@ -26,7 +26,7 @@ namespace LightestNight.System.Caching.Redis.TagCache.Expiry
             lock (_connectionLock)
             {
                 if (_connection == null)
-                    _connection = _connectionManager.GetConnection().GetSubscriber();
+                    _connection = _connectionManager.GetConnection()?.GetSubscriber();
 
                 connection = _connection;
             }

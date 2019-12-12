@@ -31,7 +31,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// <param name="expiry">The expiry date of the item</param>
         /// <param name="tags">A collection of tags to associate the item with</param>
         /// <typeparam name="T">The type of the item</typeparam>
-        Task Set<T>(string key, T value, DateTime? expiry = null, params string[] tags);
+        Task Set<T>(string key, T value, DateTime? expiry = null, params string[]? tags) where T : notnull;
 
         /// <summary>
         /// Sets the given item into the cache with the given key, expiry and tags
@@ -40,7 +40,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// <param name="value">The item to set into the cache</param>
         /// <param name="tags">A collection of tags to associate the item with</param>
         /// <typeparam name="T">The type of the item</typeparam>
-        Task Set<T>(string key, T value, params string[] tags);
+        Task Set<T>(string key, T value, params string[]? tags) where T : notnull;
 
         /// <summary>
         /// Removes the item with the given key from the cache

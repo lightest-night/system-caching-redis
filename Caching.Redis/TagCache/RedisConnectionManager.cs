@@ -9,17 +9,17 @@ namespace LightestNight.System.Caching.Redis.TagCache
     {
         private readonly object _connectionLock = new object();
         
-        private readonly string _password;
+        private readonly string? _password;
         private readonly int? _connectTimeout, _syncTimeout;
         private readonly bool _allowAdmin, _useSsl;
-        
-        private Lazy<IEnumerable<IServer>> _servers;
-        private Lazy<ConnectionMultiplexer> _connection;
+
+        private Lazy<IEnumerable<IServer>>? _servers;
+        private Lazy<ConnectionMultiplexer>? _connection;
         
         /// <summary>
         /// The host we are connecting to Redis via
         /// </summary>
-        public string Host { get; }
+        public string? Host { get; }
         
         /// <summary>
         /// The connection string that was used to connect to redis
@@ -33,7 +33,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
             Initialize();
         }
 
-        public RedisConnectionManager(string host = "localhost", int port = 6319, int? connectTimeout = null, string password = null, bool allowAdmin = false, int? syncTimeout = null,
+        public RedisConnectionManager(string? host = "localhost", int port = 6319, int? connectTimeout = null, string? password = null, bool allowAdmin = false, int? syncTimeout = null,
             bool useSsl = false)
         {
             Host = host;
@@ -47,17 +47,17 @@ namespace LightestNight.System.Caching.Redis.TagCache
             Initialize();
         }
 
-        public IEnumerable<IServer> GetServers()
-            => _servers.Value;
+        public IEnumerable<IServer>? GetServers()
+            => _servers?.Value;
 
-        public ConnectionMultiplexer GetConnection()
-            => _connection.Value;
+        public ConnectionMultiplexer? GetConnection()
+            => _connection?.Value;
         
         public void Reset(bool allowCommandsToComplete = true)
         {
             lock (_connectionLock)
             {
-                _connection.Value.Close(allowCommandsToComplete);
+                _connection?.Value.Close(allowCommandsToComplete);
                 _connection = null;
             }
         }
@@ -66,7 +66,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         {
             lock (_connectionLock)
             {
-                _connection.Value.Dispose();
+                _connection?.Value.Dispose();
                 _connection = null;
             }
         }
@@ -77,7 +77,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
             _servers = new Lazy<IEnumerable<IServer>>(() =>
             {
                 var connection = GetConnection();
-                return connection.GetEndPoints().Select(endpoint => connection.GetServer(endpoint));
+                return connection?.GetEndPoints().Select(endpoint => connection.GetServer(endpoint)) ?? Enumerable.Empty<IServer>();
             });
         }
 
