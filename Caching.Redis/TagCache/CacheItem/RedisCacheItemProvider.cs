@@ -23,11 +23,11 @@ namespace LightestNight.System.Caching.Redis.TagCache.CacheItem
         /// <param name="key">The key to get the value under</param>
         /// <typeparam name="T">The type of the item to return</typeparam>
         /// <returns>The retrieved cache item; null if nothing found</returns>
-        public async Task<RedisCacheItem<T>> Get<T>(RedisClient client, string key)
+        public async Task<RedisCacheItem<T>?> Get<T>(RedisClient client, string key)
         {
             var cacheString = await client.Get(key);
             return cacheString.HasValue
-                ? _serializer.Deserialize<RedisCacheItem<T>>(cacheString) 
+                ? _serializer.Deserialize<RedisCacheItem<T>>(cacheString)
                 : null;
         }
 
@@ -38,10 +38,13 @@ namespace LightestNight.System.Caching.Redis.TagCache.CacheItem
         /// <param name="keys">The keys to get the values under</param>
         /// <typeparam name="T">The type of the items to return</typeparam>
         /// <returns>A collection of retrieved cache items</returns>
-        public async Task<IEnumerable<RedisCacheItem<T>>> GetMany<T>(RedisClient client, params string[] keys)
+        public async Task<IEnumerable<RedisCacheItem<T>>> GetMany<T>(RedisClient client, params string[]? keys)
         {
             var result = new List<RedisCacheItem<T>>();
 
+            if (keys == null)
+                return result;
+            
             foreach (var key in keys)
             {
                 var r = await Get<T>(client, key);
@@ -61,11 +64,9 @@ namespace LightestNight.System.Caching.Redis.TagCache.CacheItem
         /// <param name="expiry">When to expire the cached item</param>
         /// <param name="tags">The tags to assign to the cached value</param>
         /// <typeparam name="T">The type of the item being stored</typeparam>
-        public Task<bool> Set<T>(RedisClient client, string key, T value, DateTime? expiry = null, params string[] tags)
+        public Task<bool> Set<T>(RedisClient client, string key, T value, DateTime? expiry = null, params string[]? tags)
+            where T : notnull
         {
-            if (value == null)
-                return Task.FromResult(false);
-
             var cacheItem = _cacheItemFactory.Create(key, value, expiry, tags);
             var serialized = _serializer.Serialize(cacheItem);
             return client.Set(key, serialized, expiry);

@@ -286,7 +286,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             result.ShouldNotBeEmpty();
 
             await cache.RemoveByTag(tag);
-            result = (await cache.GetByTag<string>(tag))?.ToArray();
+            result = (await cache.GetByTag<string>(tag)).ToArray();
             
             // Assert
             result.ShouldBeEmpty();

@@ -5,7 +5,7 @@ namespace LightestNight.System.Caching.Redis.TagCache.CacheItem
     public class RedisCacheItemFactory : IRedisCacheItemFactory
     {
         /// <inheritdoc cref="IRedisCacheItemFactory.Create" />
-        public RedisCacheItem Create(string key, params string[] tags)
+        public RedisCacheItem Create(string key, params string[]? tags)
         {
             return new RedisCacheItem
             {
@@ -15,7 +15,8 @@ namespace LightestNight.System.Caching.Redis.TagCache.CacheItem
         }
 
         /// <inheritdoc cref="IRedisCacheItemFactory.Create{T}" />
-        public RedisCacheItem<T> Create<T>(string key, T value, DateTime? expiry = null, params string[] tags)
+        public RedisCacheItem<T> Create<T>(string key, T value, DateTime? expiry = null, params string[]? tags)
+            where T : notnull
         {
             return new RedisCacheItem<T>
             {

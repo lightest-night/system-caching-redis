@@ -11,7 +11,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
 {
     public class RedisCacheProvider : IRedisCacheProvider
     {
-        private static ConcurrentDictionary<string, RedisExpiryHandler> _redisExpiryHandlersByHost;
+        private static ConcurrentDictionary<string, RedisExpiryHandler>? _redisExpiryHandlersByHost;
         
         private readonly RedisClient _client;
         private readonly RedisCacheItemProvider _redisCacheItemProvider;
@@ -21,7 +21,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// <summary>
         /// An instance of <see cref="IRedisCacheLogger" /> used to log errors and informational messages
         /// </summary>
-        public IRedisCacheLogger Logger { get; set; }
+        public IRedisCacheLogger? Logger { get; set; }
         
         public RedisCacheProvider(RedisConnectionManager connectionManager) : this(new CacheConfiguration(connectionManager))
         {}
@@ -50,7 +50,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
             }
 
             await Log(nameof(Get), key, "Not Found");
-            return default;
+            return default!;
         }
 
         /// <inheritdoc cref="IRedisCacheProvider.GetByTag{T}" />
@@ -81,19 +81,20 @@ namespace LightestNight.System.Caching.Redis.TagCache
         }
 
         /// <inheritdoc cref="IRedisCacheProvider.Set{T}(string,T,string[])" />
-        public Task Set<T>(string key, T value, params string[] tags)
+        public Task Set<T>(string key, T value, params string[]? tags) where T : notnull
             => Set(key, value, null, tags);
 
         /// <inheritdoc cref="IRedisCacheProvider.Set{T}(string,T,Nullable{DateTime},string[])" />
-        public async Task Set<T>(string key, T value, DateTime? expiry = null, params string[] tags)
+        public async Task Set<T>(string key, T value, DateTime? expiry = null, params string[]? tags)
+            where T : notnull
         {
             await Log(nameof(Set), key, null);
             if (await _redisCacheItemProvider.Set(_client, key, value, expiry, tags))
             {
-                if (tags.Length > 0)
+                if (!tags.IsNullOrEmpty())
                 {
-                    var updateTagsTask = _redisTagManager.UpdateTags(_client, key, tags);
-                    var setKeyExpiryTask = /*expiry.HasValue ? _redisExpiryProvider.SetKeyExpiry(_client, key, expiry.Value) : */Task.CompletedTask;
+                    var updateTagsTask = _redisTagManager.UpdateTags(_client, key, tags!);
+                    var setKeyExpiryTask = expiry.HasValue ? _redisExpiryProvider.SetKeyExpiry(_client, key, expiry.Value) : Task.CompletedTask;
 
                     await Task.WhenAll(updateTagsTask, setKeyExpiryTask);
                 }
@@ -173,7 +174,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
             });
         }
 
-        private Task Log(string method, string arg, string message)
+        private Task Log(string method, string arg, string? message)
             => Logger == null
                 ? Task.CompletedTask
                 : Logger.Log(method, arg, message);

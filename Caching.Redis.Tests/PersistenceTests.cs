@@ -12,7 +12,7 @@ namespace LightestNight.System.Caching.Redis.Tests
         {
             private string TestProperty { get; } = "Test";
 
-            public override bool Equals(object obj)
+            public override bool Equals(object? obj)
             {
                 if (obj == null)
                     return false;
@@ -68,7 +68,7 @@ namespace LightestNight.System.Caching.Redis.Tests
             const string cacheKey = "TestCacheKey";
             
             // Act
-            await _sut.Save<object>(cacheKey, null);
+            await _sut.Save<object>(cacheKey, null!);
             
             // Assert
             _redisCacheProviderMock.Verify(x => x.Set(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateTime?>(), It.IsAny<string[]>()), Times.Never);

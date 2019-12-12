@@ -22,7 +22,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// <param name="client">The <see cref="RedisClient" /> to use to connect to Redis</param>
         /// <param name="tag">The tag to get the keys for</param>
         /// <returns>A collection of cache keys; null if none found</returns>
-        public static async Task<IEnumerable<string>> GetKeysForTag(RedisClient client, string tag)
+        public static async Task<IEnumerable<string>?> GetKeysForTag(RedisClient client, string tag)
         {
             var keys = (await client.GetKeysForTag(tag)).ToArray();
             return keys.IsNullOrEmpty() ? null : keys;
@@ -78,7 +78,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
             return client.SetTagsForKey(cacheItem.Key, null);
         }
         
-        private static async Task<IEnumerable<string>> GetTagsForKey(RedisClient client, string key)
+        private static async Task<IEnumerable<string>?> GetTagsForKey(RedisClient client, string key)
         {
             var tags = (await client.GetTagsForKey(key)).ToArray();
             return tags.IsNullOrEmpty() ? null : tags;
@@ -101,7 +101,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
                 return;
 
             await RemoveKeyFromTags(client, cacheItem);
-            await client.AddKeyToTags(cacheItem.Key, cacheItem.Tags);
+            await client.AddKeyToTags(cacheItem.Key, cacheItem.Tags!);
         }
     }
 }
