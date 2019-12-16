@@ -124,9 +124,6 @@ namespace LightestNight.System.Caching.Redis.TagCache
                 return;
 
             var connection = _connectionManager.GetConnection();
-            if (connection == null)
-                throw new RedisConnectionException(ConnectionFailureType.InternalFailure, "There was an error when retrieving the Redis Connection.");
-            
             var transaction = connection.GetDatabase(_db).CreateTransaction();
 
             foreach (var tag in enumeratedTags)
@@ -151,9 +148,6 @@ namespace LightestNight.System.Caching.Redis.TagCache
                 return true;
             
             var connection = _connectionManager.GetConnection();
-            if (connection == null)
-                throw new RedisConnectionException(ConnectionFailureType.InternalFailure, "There was an error when retrieving the Redis Connection.");
-            
             var transaction = connection.GetDatabase(_db).CreateTransaction();
 
             if (tags != null)
@@ -183,9 +177,6 @@ namespace LightestNight.System.Caching.Redis.TagCache
                 return true;
             
             var connection = _connectionManager.GetConnection();
-            if (connection == null)
-                throw new RedisConnectionException(ConnectionFailureType.InternalFailure, "There was an error when retrieving the Redis Connection.");
-            
             var transaction = connection.GetDatabase(_db).CreateTransaction();
                 
 #pragma warning disable 4014
@@ -213,9 +204,6 @@ namespace LightestNight.System.Caching.Redis.TagCache
         public async Task<IEnumerable<string>> GetTagsForKey(string key)
         {
             var connection = _connectionManager.GetConnection();
-            if (connection == null)
-                throw new RedisConnectionException(ConnectionFailureType.InternalFailure, "There was an error when retrieving the Redis Connection.");
-            
             var result = await connection.GetDatabase(_db).SetMembersAsync(KeyTagsListKey(key));
 
             return result.Where(redisValue => !redisValue.IsNullOrEmpty).Select(redisValue => redisValue.ToString());
@@ -230,9 +218,6 @@ namespace LightestNight.System.Caching.Redis.TagCache
         public Task<bool> SetTimeSet(string setKey, string value, DateTime date)
         {
             var connection = _connectionManager.GetConnection();
-            if (connection == null)
-                throw new RedisConnectionException(ConnectionFailureType.InternalFailure, "There was an error when retrieving the Redis Connection.");
-
             var rank = Helpers.TimeToRank(date);
             return connection.GetDatabase(_db).SortedSetAddAsync(setKey, value, rank);
         }
@@ -245,9 +230,6 @@ namespace LightestNight.System.Caching.Redis.TagCache
         public async Task<bool> RemoveTimeSet(string setKey, IEnumerable<string> keys)
         {
             var connection = _connectionManager.GetConnection();
-            if (connection == null)
-                throw new RedisConnectionException(ConnectionFailureType.InternalFailure, "There was an error when retrieving the Redis Connection.");
-            
             await connection.GetDatabase(_db).SortedSetRemoveAsync(setKey, keys.Select(k => (RedisValue) k).ToArray());
 
             return true;
@@ -261,9 +243,6 @@ namespace LightestNight.System.Caching.Redis.TagCache
         public async Task<IEnumerable<string>> GetFromTimeSet(string setKey, DateTime maxDate)
         {
             var connection = _connectionManager.GetConnection();
-            if (connection == null)
-                throw new RedisConnectionException(ConnectionFailureType.InternalFailure, "There was an error when retrieving the Redis Connection.");
-            
             var timeAsRank = Helpers.TimeToRank(maxDate);
             var keys = await connection.GetDatabase(_db).SortedSetRangeByScoreAsync(setKey, start: -1, stop: timeAsRank);
             return keys.Select(k => k.ToString());
@@ -276,9 +255,6 @@ namespace LightestNight.System.Caching.Redis.TagCache
         public Task RemoveKey(string key)
         {
             var connection = _connectionManager.GetConnection();
-            if (connection == null)
-                throw new RedisConnectionException(ConnectionFailureType.InternalFailure, "There was an error when retrieving the Redis Connection.");
-            
             return connection.GetDatabase(_db).KeyDeleteAsync(key);
         }
 
@@ -290,9 +266,6 @@ namespace LightestNight.System.Caching.Redis.TagCache
         public Task Expire(string key, DateTime expiry)
         {
             var connection = _connectionManager.GetConnection();
-            if (connection == null)
-                throw new RedisConnectionException(ConnectionFailureType.InternalFailure, "There was an error when retrieving the Redis Connection.");
-            
             return connection.GetDatabase(_db).KeyExpireAsync(key, expiry.TimeOfDay);
         }
 
@@ -304,9 +277,6 @@ namespace LightestNight.System.Caching.Redis.TagCache
         public Task<bool> Exists(string key)
         {
             var connection = _connectionManager.GetConnection();
-            if (connection == null)
-                throw new RedisConnectionException(ConnectionFailureType.InternalFailure, "There was an error when retrieving the Redis Connection.");
-            
             return connection.GetDatabase(_db).KeyExistsAsync(key);
         }
         
@@ -394,9 +364,6 @@ namespace LightestNight.System.Caching.Redis.TagCache
                 return;
 
             var connection = _connectionManager.GetConnection();
-            if (connection == null)
-                throw new RedisConnectionException(ConnectionFailureType.InternalFailure, "There was an error when retrieving the Redis Connection.");
-
             await connection.GetDatabase(_db).KeyDeleteAsync(KeyTagsListKey(key));
         }
     }

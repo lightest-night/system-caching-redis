@@ -49,9 +49,15 @@ namespace LightestNight.System.Caching.Redis.TagCache
 
         public IEnumerable<IServer>? GetServers()
             => _servers?.Value;
+        
+        public ConnectionMultiplexer GetConnection()
+        {
+            var connection = _connection?.Value;
+            if (connection == null)
+                throw new RedisConnectionException(ConnectionFailureType.InternalFailure, "There was an error when retrieving the Redis Connection.");
 
-        public ConnectionMultiplexer? GetConnection()
-            => _connection?.Value;
+            return connection;
+        }
         
         public void Reset(bool allowCommandsToComplete = true)
         {
