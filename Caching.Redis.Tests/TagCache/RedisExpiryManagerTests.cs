@@ -69,22 +69,22 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             const string key1 = "expiringkey.1";
             const string key2 = "expiringkey.2";
             const string key3 = "expiringkey.3";
-            
-            await Task.WhenAll(_sut.SetKeyExpiry(_redisClient, key1, new DateTime(2012, 1, 1, 12, 1, 1)), 
-                _sut.SetKeyExpiry(_redisClient, key2, new DateTime(2015, 1, 1, 12, 1, 2)),
-                _sut.SetKeyExpiry(_redisClient, key3, new DateTime(2020, 1, 1, 12, 1, 3)));
 
-            var keys = (await _sut.GetExpiredKeys(_redisClient, new DateTime(2020, 1, 1, 12, 1, 5))).ToArray();
+            await Task.WhenAll(_sut.SetKeyExpiry(_redisClient, key1, DateTime.Today.AddYears(-5)),
+                _sut.SetKeyExpiry(_redisClient, key2, DateTime.Today.AddYears(-2)),
+                _sut.SetKeyExpiry(_redisClient, key3, DateTime.Today.AddYears(1)));
+
+            var keys = (await _sut.GetExpiredKeys(_redisClient, DateTime.Today.AddYears(1).AddMonths(6))).ToArray();
             keys.ShouldNotBeNull();
+            keys.Length.ShouldBe(3);
             keys.ShouldContain(key1, $"{key1} should exist");
             keys.ShouldContain(key2, $"{key2} should exist");
             keys.ShouldContain(key3, $"{key3} should exist");
-            keys.Length.ShouldBe(3);
-            
+
             // Act
             await _sut.RemoveKeyExpiry(_redisClient, keys);
-            var result = (await _sut.GetExpiredKeys(_redisClient, new DateTime(2020, 1, 1, 12, 1, 5)))?.ToArray();
-            
+            var result = (await _sut.GetExpiredKeys(_redisClient, DateTime.Today.AddYears(1).AddMonths(6)))?.ToArray();
+
             // Assert
             result.ShouldNotBeNull();
             result.ShouldBeEmpty();
