@@ -1,15 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caching.Redis", "Caching.Redis\Caching.Redis.csproj", "{A2F7085B-07A6-4979-865D-826C6A183506}"
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caching.Redis", "Caching.Redis\Caching.Redis.csproj", "{A2F7085B-07A6-4979-865D-826C6A183506}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caching.Redis.Tests", "Caching.Redis.Tests\Caching.Redis.Tests.csproj", "{6CB9C4B5-950D-4E4D-A267-A7D2D2E54F7F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caching.Redis.Tests", "Caching.Redis.Tests\Caching.Redis.Tests.csproj", "{6CB9C4B5-950D-4E4D-A267-A7D2D2E54F7F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BAA52F65-A95E-49C9-A6D3-9EBE57052C12}"
-ProjectSection(SolutionItems) = preProject
-	README.md = README.md
-	appveyor.yml = appveyor.yml
-	GitVersion.yml = GitVersion.yml
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		GitVersion.yml = GitVersion.yml
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,5 +27,11 @@ Global
 		{6CB9C4B5-950D-4E4D-A267-A7D2D2E54F7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6CB9C4B5-950D-4E4D-A267-A7D2D2E54F7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6CB9C4B5-950D-4E4D-A267-A7D2D2E54F7F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6BA51320-0184-438E-BA2A-B66EDCB283A8}
 	EndGlobalSection
 EndGlobal
