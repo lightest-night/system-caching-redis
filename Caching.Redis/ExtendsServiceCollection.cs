@@ -8,7 +8,6 @@ namespace LightestNight.System.Caching.Redis
 {
     public static class ExtendsServiceCollection
     {
-        //public static IServiceCollection AddRedisCache(this IServiceCollection services, Action<RedisConnectionManager> connectionAction = null)
         public static IServiceCollection AddRedisCache(this IServiceCollection services, Action<CacheConfig> configAction)
         {
             if (configAction == null)

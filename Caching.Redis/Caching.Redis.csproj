@@ -21,9 +21,9 @@
         <AssemblyVersion>1.0.0</AssemblyVersion>
         <FileVersion>1.0.0</FileVersion>
         <InformationalVersion>1.0.0</InformationalVersion>
-        <PackageIconUrl>https://www.gravatar.com/avatar/01d9ae6081c5243ef46b38dc4056f9d8</PackageIconUrl>
-        <PackageIconUrl>icon.jpeg</PackageIconUrl>
         <RepositoryUrl>https://github.com/lightestnight/system.caching.redis</RepositoryUrl>
+        <PackageIcon>icon.jpeg</PackageIcon>
+        <PackageIconUrl />
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -35,7 +35,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="LightestNight.System.Caching" Version="0.1.2" />
+      <PackageReference Include="LightestNight.System.Caching" Version="0.1.5" />
       <PackageReference Include="LightestNight.System.Utilities" Version="1.8.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.0" />
       <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="3.1.0" />
@@ -46,9 +46,10 @@
 
     <ItemGroup>
       <None Remove="icon.jpeg" />
-      <Content Include="icon.jpeg">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
+      <None Include="..\icon.jpeg">
+        <Pack>True</Pack>
+        <PackagePath></PackagePath>
+      </None>
     </ItemGroup>
 
 </Project>
