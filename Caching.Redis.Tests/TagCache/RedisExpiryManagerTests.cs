@@ -9,8 +9,9 @@ using Xunit;
 
 namespace LightestNight.System.Caching.Redis.Tests.TagCache
 {
-    public class RedisExpiryManagerTests
+    public class RedisExpiryManagerTests : IDisposable
     {
+        private readonly string _keyGroup = nameof(RedisExpiryManagerTests);
         private readonly string _setKey;
         private readonly RedisClient _redisClient;
         private readonly RedisExpiryProvider _sut;
@@ -66,9 +67,9 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         {
             // Arrange
             await _redisClient.Remove(_setKey);
-            const string key1 = "expiringkey.1";
-            const string key2 = "expiringkey.2";
-            const string key3 = "expiringkey.3";
+            var key1 = $"{_keyGroup}:expiringkey.1";
+            var key2 = $"{_keyGroup}:expiringkey.2";
+            var key3 = $"{_keyGroup}:expiringkey.3";
 
             await Task.WhenAll(_sut.SetKeyExpiry(_redisClient, key1, DateTime.Today.AddYears(-5)),
                 _sut.SetKeyExpiry(_redisClient, key2, DateTime.Today.AddYears(-2)),
@@ -88,6 +89,11 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             // Assert
             result.ShouldNotBeNull();
             result.ShouldBeEmpty();
+        }
+
+        public void Dispose()
+        {
+            _redisClient.Remove(_keyGroup);
         }
     }
 }
