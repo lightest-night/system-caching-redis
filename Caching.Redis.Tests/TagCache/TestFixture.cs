@@ -16,7 +16,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
 
     public class TestFixture : IAsyncLifetime
     {
-        private readonly string _testGroupKey = "TESTS";
+        private readonly string _testGroupKey = "TESTSS";
 
         public RedisClient RedisClient { get; }
         public RedisConnectionManager RedisConnectionManager { get; }
