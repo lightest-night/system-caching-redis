@@ -9,20 +9,23 @@ using Xunit;
 
 namespace LightestNight.System.Caching.Redis.Tests.TagCache
 {
-    public class RedisExpiryManagerTests : IDisposable
+    [Collection(nameof(TestCollection))]
+    public class RedisExpiryManagerTests
     {
-        private readonly string _keyGroup = nameof(RedisExpiryManagerTests);
         private readonly string _setKey;
         private readonly RedisClient _redisClient;
         private readonly RedisExpiryProvider _sut;
 
-        public RedisExpiryManagerTests()
+        private readonly TestFixture _fixture;
+
+        public RedisExpiryManagerTests(TestFixture fixture)
         {
-            var redis = new RedisConnectionManager(ConnectionHelper.IntegrationTestHost, ConnectionHelper.Port, password: ConnectionHelper.Password, useSsl: ConnectionHelper.UseSsl);
-            _redisClient = new RedisClient(redis);
-            _sut = new RedisExpiryProvider(new CacheConfiguration(redis));
+            _redisClient = fixture.RedisClient;
+            _sut = new RedisExpiryProvider(new CacheConfiguration(fixture.RedisConnectionManager));
 
             _setKey = _sut.SetKey;
+
+            _fixture = fixture;
         }
 
         [Fact]
@@ -30,7 +33,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         {
             // Arrange
             await _redisClient.Remove(_setKey);
-            const string key = "expiringkey";
+            var key = _fixture.FormatKey("expiringkey");
             
             // Act & Assert
             Should.NotThrow(() => _sut.SetKeyExpiry(_redisClient, key, DateTime.Now.AddYears(-1)));
@@ -41,9 +44,9 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         {
             // Arrange
             await _redisClient.Remove(_setKey);
-            const string key1 = "expiringkey.1";
-            const string key2 = "expiringkey.2";
-            const string key3 = "expiringkey.3";
+            var key1 = _fixture.FormatKey("expiringkey.1");
+            var key2 = _fixture.FormatKey("expiringkey.2");
+            var key3 = _fixture.FormatKey("expiringkey.3");
 
             var minus10Date = DateTime.Now.AddYears(-1).AddMinutes(-10);
             var minus20Date = DateTime.Now.AddYears(-1).AddMinutes(-20);
@@ -67,9 +70,9 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         {
             // Arrange
             await _redisClient.Remove(_setKey);
-            var key1 = $"{_keyGroup}:expiringkey.1";
-            var key2 = $"{_keyGroup}:expiringkey.2";
-            var key3 = $"{_keyGroup}:expiringkey.3";
+            var key1 = _fixture.FormatKey("expiringkey.1");
+            var key2 = _fixture.FormatKey("expiringkey.2");
+            var key3 = _fixture.FormatKey("expiringkey.3");
 
             await Task.WhenAll(_sut.SetKeyExpiry(_redisClient, key1, DateTime.Today.AddYears(-5)),
                 _sut.SetKeyExpiry(_redisClient, key2, DateTime.Today.AddYears(-2)),
@@ -89,11 +92,6 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             // Assert
             result.ShouldNotBeNull();
             result.ShouldBeEmpty();
-        }
-
-        public void Dispose()
-        {
-            _redisClient.Remove(_keyGroup);
         }
     }
 }
