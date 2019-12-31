@@ -1,6 +1,7 @@
 ﻿using LightestNight.System.Caching.Redis.TagCache;
 using LightestNight.System.Caching.Redis.Tests.TagCache.Helpers;
 using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace LightestNight.System.Caching.Redis.Tests.TagCache
@@ -13,7 +14,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         // ICollectionFixture<> interfaces.
     }
 
-    public class TestFixture : IDisposable
+    public class TestFixture : IAsyncLifetime
     {
         private readonly string _testGroupKey = "TESTS";
 
@@ -26,6 +27,8 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             RedisClient = new RedisClient(RedisConnectionManager);           
         }
 
+        public Task InitializeAsync() => Task.CompletedTask;
+
         /// <summary>
         /// Formats the given cache key with the test group so as to be easily separated from any other data
         /// </summary>
@@ -33,9 +36,10 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         /// <returns>A formatted cache key</returns>
         public string FormatKey(string key) => $"{_testGroupKey}:{key}";
 
-        public void Dispose()
+        public async Task DisposeAsync()
         {
-            RedisClient.RemoveKey(_testGroupKey);
+            await RedisClient.RemoveKey(_testGroupKey);
+            await RedisClient.RemoveExpiredKeysFromTags();
         }
     }
 }
