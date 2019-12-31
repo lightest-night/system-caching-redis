@@ -1,23 +1,29 @@
 using System;
 using System.Threading.Tasks;
 using LightestNight.System.Caching.Redis.TagCache;
-using LightestNight.System.Caching.Redis.Tests.TagCache.Helpers;
 using Shouldly;
 using StackExchange.Redis;
 using Xunit;
 
 namespace LightestNight.System.Caching.Redis.Tests.TagCache
 {
+    [Collection(nameof(TestCollection))]
     public class RedisClientTests
     {
-        private static readonly RedisConnectionManager Redis = new RedisConnectionManager(ConnectionHelper.IntegrationTestHost, ConnectionHelper.Port, password: ConnectionHelper.Password, useSsl: ConnectionHelper.UseSsl);
-        private readonly RedisClient _sut = new RedisClient(Redis);
+        private readonly RedisClient _sut;
+        private readonly TestFixture _fixture;
+
+        public RedisClientTests(TestFixture fixture)
+        {
+            _sut = fixture.RedisClient;
+            _fixture = fixture;
+        }
 
         [Fact]
         public void Should_Add_Successfully()
         {
             // Arrange
-            const string key = "TagCacheTests:Add";
+            var key = _fixture.FormatKey("TagCacheTests:Add");
             const string value = "Test Value";
             var expiry = DateTime.Now.AddSeconds(3);
             
@@ -29,7 +35,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         public async Task Should_Return_Null_When_Key_Is_Missing()
         {
             // Arrange
-            const string key = "TagCacheTests:Missing";
+            var key = _fixture.FormatKey("TagCacheTests:Missing");
             
             // Act
             var result = await _sut.Get(key);
@@ -42,7 +48,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         public async Task Should_Return_Value_When_Key_Is_Found()
         {
             // Arrange
-            const string key = "TagCacheTests:Add";
+            var key = _fixture.FormatKey("TagCacheTests:Add");
             const string value = "Test Value";
             var expiry = DateTime.Now.AddSeconds(3);
             await _sut.Set(key, value, expiry);
@@ -59,7 +65,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         public async Task Should_Return_Null_After_Key_Is_Removed()
         {
             // Arrange
-            const string key = "TagCacheTests:Add";
+            var key = _fixture.FormatKey("TagCacheTests:Add");
             const string value = "Test Value";
             var expiry = DateTime.Now.AddSeconds(3);
             await _sut.Set(key, value, expiry);
@@ -76,9 +82,9 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         public async Task Should_Return_Null_When_Multiple_Keys_Removed()
         {
             // Arrange
-            const string key1 = "TagCacheTests:1";
-            const string key2 = "TagCacheTests:2";
-            const string key3 = "TagCacheTests:3";
+            var key1 = _fixture.FormatKey("TagCacheTests:1");
+            var key2 = _fixture.FormatKey("TagCacheTests:2");
+            var key3 = _fixture.FormatKey("TagCacheTests:3");
             const string value1 = "Test Value 1";
             const string value2 = "Test Value 2";
             const string value3 = "Test Value 3";

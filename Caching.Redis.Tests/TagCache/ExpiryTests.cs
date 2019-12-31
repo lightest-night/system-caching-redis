@@ -9,19 +9,23 @@ using Xunit;
 
 namespace LightestNight.System.Caching.Redis.Tests.TagCache
 {
+    [Collection(nameof(TestCollection))]
     public class ExpiryTests
     {
         private readonly RedisCacheProvider _sut;
         private readonly CacheConfiguration _config;
+
+        private readonly TestFixture _fixture;
         
-        public ExpiryTests()
+        public ExpiryTests(TestFixture fixture)
         {
-            var redis = new RedisConnectionManager(ConnectionHelper.IntegrationTestHost, ConnectionHelper.Port, password: ConnectionHelper.Password, useSsl: ConnectionHelper.UseSsl);
-            _config = new CacheConfiguration(redis);
+            _config = new CacheConfiguration(fixture.RedisConnectionManager);
             _sut = new RedisCacheProvider(_config)
             {
                 Logger = new TestRedisLogger()
             };
+
+            _fixture = fixture;
         }
         
         [Fact]
@@ -29,7 +33,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         {
             // Arrange
             await _sut.RemoveExpiredKeys();
-            var key = $"TagCacheTests:{nameof(Should_Remove_Expired_Item_From_Cache)}";
+            var key = _fixture.FormatKey($"TagCacheTests:{nameof(Should_Remove_Expired_Item_From_Cache)}");
             const string value = "Test Value";
             var expires = DateTime.Now.AddSeconds(3);
 
@@ -65,7 +69,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             await _sut.RemoveExpiredKeys();
             var client = new RedisClient(_config.RedisClientConfiguration.RedisConnectionManager);
             
-            var key = $"TagCacheTests:{nameof(Should_Remove_Expired_Tags_From_Cache)}";
+            var key = _fixture.FormatKey($"TagCacheTests:{nameof(Should_Remove_Expired_Tags_From_Cache)}");
             const string value = "Test Value";
             var expires = DateTime.Now.AddSeconds(2);
             
