@@ -2,16 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using LightestNight.System.Caching.Redis.TagCache.CacheItem;
 using LightestNight.System.Utilities.Extensions;
 
 namespace LightestNight.System.Caching.Redis.TagCache
 {
     public class RedisTagManager
     {
-        private readonly IRedisCacheItemFactory _cacheItemFactory;
+        private readonly ICacheItemFactory _cacheItemFactory;
 
-        public RedisTagManager(IRedisCacheItemFactory cacheItemFactory)
+        public RedisTagManager(ICacheItemFactory cacheItemFactory)
         {
             _cacheItemFactory = cacheItemFactory;
         }
@@ -33,7 +32,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// </summary>
         /// <param name="client">The <see cref="RedisClient" /> to use to connect to Redis</param>
         /// <param name="cacheItem">The item to remove the tags from</param>
-        public static Task RemoveTags(RedisClient client, RedisCacheItem cacheItem)
+        public static Task RemoveTags(RedisClient client, CacheItem cacheItem)
             => Task.WhenAll(RemoveKeyFromTags(client, cacheItem), RemoveTagsForItem(client, cacheItem));
 
         /// <summary>
@@ -62,7 +61,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
             }, Environment.ProcessorCount);
         }
 
-        private static Task RemoveKeyFromTags(RedisClient client, RedisCacheItem item)
+        private static Task RemoveKeyFromTags(RedisClient client, CacheItem item)
         {
             if (item == null || item.Tags.IsNullOrEmpty())
                 return Task.CompletedTask;
@@ -70,7 +69,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
             return client.RemoveKeyFromTags(item.Key, item.Tags);
         }
 
-        private static Task RemoveTagsForItem(RedisClient client, RedisCacheItem cacheItem)
+        private static Task RemoveTagsForItem(RedisClient client, CacheItem cacheItem)
         {
             if (cacheItem == null || cacheItem.Tags.IsNullOrEmpty())
                 return Task.CompletedTask;
@@ -84,10 +83,10 @@ namespace LightestNight.System.Caching.Redis.TagCache
             return tags.IsNullOrEmpty() ? null : tags;
         }
 
-        private static Task UpdateTags(RedisClient client, RedisCacheItem cacheItem)
+        private static Task UpdateTags(RedisClient client, CacheItem cacheItem)
             => Task.WhenAll(SetTagsForItem(client, cacheItem), AddItemToTags(client, cacheItem));
         
-        private static Task SetTagsForItem(RedisClient client, RedisCacheItem cacheItem)
+        private static Task SetTagsForItem(RedisClient client, CacheItem cacheItem)
         {
             if (cacheItem == null || cacheItem.Tags.IsNullOrEmpty())
                 return Task.CompletedTask;
@@ -95,7 +94,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
             return client.SetTagsForKey(cacheItem.Key, cacheItem.Tags.ToArray());
         }
 
-        private static async Task AddItemToTags(RedisClient client, RedisCacheItem cacheItem)
+        private static async Task AddItemToTags(RedisClient client, CacheItem cacheItem)
         {
             if (cacheItem == null || cacheItem.Tags.IsNullOrEmpty())
                 return;

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using LightestNight.System.Caching.Redis.TagCache.CacheItem;
 
 namespace LightestNight.System.Caching.Redis.TagCache
 {
@@ -58,7 +57,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// Removes the given item from the cache
         /// </summary>
         /// <param name="item">The item to remove</param>
-        Task Remove(RedisCacheItem item);
+        Task Remove(CacheItem item);
 
         /// <summary>
         /// Removes the items in the cache associated to the given tag

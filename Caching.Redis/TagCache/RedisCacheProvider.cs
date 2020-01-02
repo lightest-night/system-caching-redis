@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using LightestNight.System.Caching.Redis.TagCache.CacheItem;
 using LightestNight.System.Caching.Redis.TagCache.Expiry;
 using LightestNight.System.Utilities.Extensions;
 
@@ -121,7 +120,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         }
         
         /// <inheritdoc cref="IRedisCacheProvider.Remove(RedisCacheItem)" />
-        public async Task Remove(RedisCacheItem cacheItem)
+        public async Task Remove(CacheItem cacheItem)
         {
             await Log(nameof(Remove), cacheItem.Key, "Removed via the `Remove(IRedisCacheItem)` method");
             await Task.WhenAll(_client.Remove(cacheItem.Key), RedisTagManager.RemoveTags(_client, cacheItem), _redisExpiryProvider.RemoveKeyExpiry(_client, cacheItem.Key));
@@ -179,7 +178,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
                 ? Task.CompletedTask
                 : Logger.Log(method, arg, message);
 
-        private async Task<bool> CacheItemIsValid(RedisCacheItem item)
+        private async Task<bool> CacheItemIsValid(CacheItem item)
         {
             if (!item.Expiry.HasValue || item.Expiry.Value >= DateTime.Now) 
                 return true;

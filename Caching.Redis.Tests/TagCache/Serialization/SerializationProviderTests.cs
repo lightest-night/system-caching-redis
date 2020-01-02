@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using LightestNight.System.Caching.Redis.TagCache.CacheItem;
 using LightestNight.System.Caching.Redis.TagCache.Serialization;
 using Shouldly;
 using Xunit;
@@ -11,7 +10,7 @@ using Xunit.Abstractions;
 namespace LightestNight.System.Caching.Redis.Tests.TagCache.Serialization
 {
     public abstract class SerializationProviderTests<TCacheItem>
-        where TCacheItem : RedisCacheItem<TestObject>, new()
+        where TCacheItem : CacheItem<TestObject>, new()
     {
         private readonly ITestOutputHelper _output;
 

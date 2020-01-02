@@ -1,4 +1,3 @@
-using LightestNight.System.Caching.Redis.TagCache.CacheItem;
 using LightestNight.System.Caching.Redis.TagCache.Serialization;
 
 namespace LightestNight.System.Caching.Redis.TagCache
@@ -28,9 +27,9 @@ namespace LightestNight.System.Caching.Redis.TagCache
         public ISerializationProvider Serializer { get; set; } = new JsonSerializationProvider();
         
         /// <summary>
-        /// The <see cref="IRedisCacheItemFactory" /> to use
+        /// The <see cref="ICacheItemFactory" /> to use
         /// </summary>
-        public IRedisCacheItemFactory CacheItemFactory { get; set; } = new RedisCacheItemFactory();
+        public ICacheItemFactory CacheItemFactory { get; set; } = new CacheItemFactory();
 
         public CacheConfiguration(RedisConnectionManager connectionManager)
         {
