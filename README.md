@@ -28,3 +28,5 @@ Hooks, utilities and helpers to allow caching to the Redis distributed cache
   
 ###### Manual Expiry
 If the instance of Redis in use doesn't support Key Events, then we can manually remove expired tags. To do this set the `ManuallyProcessExpiredKeys` option to `true` in the `CacheConfig`
+
+Changed for stus benefit
