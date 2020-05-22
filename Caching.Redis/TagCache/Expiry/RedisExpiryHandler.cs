@@ -2,6 +2,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using LightestNight.System.Utilities.Extensions;
 using StackExchange.Redis;
 
 namespace LightestNight.System.Caching.Redis.TagCache.Expiry
@@ -20,13 +21,13 @@ namespace LightestNight.System.Caching.Redis.TagCache.Expiry
 
         public RedisExpiryHandler(CacheConfiguration cacheConfiguration)
         {
-            var subscriber = new RedisSubscriberConnectionManager(cacheConfiguration.RedisClientConfiguration.RedisConnectionManager).GetConnection();
+            var subscriber = new RedisSubscriberConnectionManager(cacheConfiguration.ThrowIfNull(nameof(cacheConfiguration)).RedisClientConfiguration.RedisConnectionManager).GetConnection();
             subscriber?.Subscribe(new RedisChannel("*:expired", RedisChannel.PatternMode.Pattern), SubscriberMessageReceived);
         }
 
         private void SubscriberMessageReceived(RedisChannel redisChannel, RedisValue redisValue)
         {
-            if (!redisChannel.ToString().EndsWith("expired")) 
+            if (!redisChannel.ToString().EndsWith("expired", StringComparison.InvariantCultureIgnoreCase)) 
                 return;
             
             var key = Encoding.UTF8.GetString(redisValue);

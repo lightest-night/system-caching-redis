@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using LightestNight.System.Caching.Redis.TagCache;
+using LightestNight.System.Utilities.Extensions;
 using Shouldly;
 using StackExchange.Redis;
 using Xunit;
@@ -15,12 +16,12 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
 
         public RedisClientTests(TestFixture fixture)
         {
-            _sut = fixture.RedisClient;
+            _sut = fixture.ThrowIfNull().RedisClient;
             _fixture = fixture;
         }
 
         [Fact]
-        public void Should_Add_Successfully()
+        public void ShouldAddSuccessfully()
         {
             // Arrange
             var key = _fixture.FormatKey("TagCacheTests:Add");
@@ -28,33 +29,33 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             var expiry = DateTime.Now.AddSeconds(3);
             
             // Act & Assert
-            Should.NotThrow(async () => await _sut.Set(key, value, expiry));
+            Should.NotThrow(async () => await _sut.Set(key, value, expiry).ConfigureAwait(false));
         }
 
         [Fact]
-        public async Task Should_Return_Null_When_Key_Is_Missing()
+        public async Task ShouldReturnNullWhenKeyIsMissing()
         {
             // Arrange
             var key = _fixture.FormatKey("TagCacheTests:Missing");
             
             // Act
-            var result = await _sut.Get(key);
+            var result = await _sut.Get(key).ConfigureAwait(false);
             
             // Assert
             result.ShouldBe(RedisValue.Null);
         }
 
         [Fact]
-        public async Task Should_Return_Value_When_Key_Is_Found()
+        public async Task ShouldReturnValueWhenKeyIsFound()
         {
             // Arrange
             var key = _fixture.FormatKey("TagCacheTests:Add");
             const string value = "Test Value";
             var expiry = DateTime.Now.AddSeconds(3);
-            await _sut.Set(key, value, expiry);
+            await _sut.Set(key, value, expiry).ConfigureAwait(false);
 
             // Arrange
-            var result = await _sut.Get(key);
+            var result = await _sut.Get(key).ConfigureAwait(false);
             
             // Act
             result.ShouldNotBe(RedisValue.Null);
@@ -62,24 +63,24 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         }
 
         [Fact]
-        public async Task Should_Return_Null_After_Key_Is_Removed()
+        public async Task ShouldReturnNullAfterKeyIsRemoved()
         {
             // Arrange
             var key = _fixture.FormatKey("TagCacheTests:Add");
             const string value = "Test Value";
             var expiry = DateTime.Now.AddSeconds(3);
-            await _sut.Set(key, value, expiry);
+            await _sut.Set(key, value, expiry).ConfigureAwait(false);
             
             // Act
-            await _sut.Remove(key);
-            var result = await _sut.Get(key);
+            await _sut.Remove(key).ConfigureAwait(false);
+            var result = await _sut.Get(key).ConfigureAwait(false);
             
             // Assert
             result.ShouldBe(RedisValue.Null);
         }
 
         [Fact]
-        public async Task Should_Return_Null_When_Multiple_Keys_Removed()
+        public async Task ShouldReturnNullWhenMultipleKeysRemoved()
         {
             // Arrange
             var key1 = _fixture.FormatKey("TagCacheTests:1");
@@ -90,13 +91,13 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             const string value3 = "Test Value 3";
             var expiry = DateTime.Now.AddSeconds(3);
 
-            await Task.WhenAll(_sut.Set(key1, value1, expiry), _sut.Set(key2, value2, expiry), _sut.Set(key3, value3, expiry));
+            await Task.WhenAll(_sut.Set(key1, value1, expiry), _sut.Set(key2, value2, expiry), _sut.Set(key3, value3, expiry)).ConfigureAwait(false);
             
             // Act
-            await _sut.Remove(new[] {key1, key2, key3});
-            var result1 = await _sut.Get(key1);
-            var result2 = await _sut.Get(key2);
-            var result3 = await _sut.Get(key3);
+            await _sut.Remove(new[] {key1, key2, key3}).ConfigureAwait(false);
+            var result1 = await _sut.Get(key1).ConfigureAwait(false);
+            var result2 = await _sut.Get(key2).ConfigureAwait(false);
+            var result3 = await _sut.Get(key3).ConfigureAwait(false);
             
             // Assert
             result1.ShouldBe(RedisValue.Null);

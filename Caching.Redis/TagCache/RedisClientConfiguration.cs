@@ -2,7 +2,6 @@ namespace LightestNight.System.Caching.Redis.TagCache
 {
     public class RedisClientConfiguration
     {
-        private const string DefaultHost = "localhost";
         private const int DefaultDbIndex = 0;
         private const int DefaultTimeoutMilliseconds = 1000;
 

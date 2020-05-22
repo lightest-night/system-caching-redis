@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Xml;
 using System.Xml.Serialization;
 using StackExchange.Redis;
 
@@ -13,8 +14,8 @@ namespace LightestNight.System.Caching.Redis.TagCache.Serialization
         {
             var xmlSerializer = new XmlSerializer(typeof(T));
 
-            using var textReader = new StringReader(value);
-            if (xmlSerializer.Deserialize(textReader) is T providedValue)
+            using var reader = new XmlTextReader(value);
+            if (xmlSerializer.Deserialize(reader) is T providedValue)
                 return providedValue;
 
             return default!;

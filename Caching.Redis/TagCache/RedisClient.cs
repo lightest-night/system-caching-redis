@@ -55,7 +55,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
             if (connection == null)
                 return false;
             
-            return await connection.GetDatabase(_db).StringSetAsync(key, value, ttl);
+            return await connection.GetDatabase(_db).StringSetAsync(key, value, ttl).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
             if (connection == null)
                 return default;
             
-            return await connection.GetDatabase(_db).StringGetAsync(key);
+            return await connection.GetDatabase(_db).StringGetAsync(key).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
             if (connection == null)
                 return 0;
 
-            return await connection.GetDatabase(_db).KeyDeleteAsync(keys.Select(key => (RedisKey) key).ToArray());
+            return await connection.GetDatabase(_db).KeyDeleteAsync(keys.Select(key => (RedisKey) key).ToArray()).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
             if (connection == null)
                 return Enumerable.Empty<string>();
 
-            var setMembers = await connection.GetDatabase(_db).SetMembersAsync(TagKeysListKey(tag));
+            var setMembers = await connection.GetDatabase(_db).SetMembersAsync(TagKeysListKey(tag)).ConfigureAwait(false);
             return setMembers.Where(redisValue => !redisValue.IsNullOrEmpty)
                 .Select(redisValue => redisValue.ToString());
         }
@@ -134,7 +134,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
 #pragma warning restore 4014
             }
                 
-            await transaction.ExecuteAsync();
+            await transaction.ExecuteAsync().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -161,7 +161,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
                 }
             }
 
-            await transaction.ExecuteAsync();
+            await transaction.ExecuteAsync().ConfigureAwait(false);
 
             return true;
         }
@@ -192,7 +192,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
                 transaction.SetAddAsync(KeyTagsListKey(key), tags.Select(r => (RedisValue)r).ToArray());
             }
 
-            await transaction.ExecuteAsync();
+            await transaction.ExecuteAsync().ConfigureAwait(false);
 
             return true;
         }
@@ -204,7 +204,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         public async Task<IEnumerable<string>> GetTagsForKey(string key)
         {
             var connection = _connectionManager.GetConnection();
-            var result = await connection.GetDatabase(_db).SetMembersAsync(KeyTagsListKey(key));
+            var result = await connection.GetDatabase(_db).SetMembersAsync(KeyTagsListKey(key)).ConfigureAwait(false);
 
             return result.Where(redisValue => !redisValue.IsNullOrEmpty).Select(redisValue => redisValue.ToString());
         }
@@ -230,7 +230,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         public async Task<bool> RemoveTimeSet(string setKey, IEnumerable<string> keys)
         {
             var connection = _connectionManager.GetConnection();
-            await connection.GetDatabase(_db).SortedSetRemoveAsync(setKey, keys.Select(k => (RedisValue) k).ToArray());
+            await connection.GetDatabase(_db).SortedSetRemoveAsync(setKey, keys.Select(k => (RedisValue) k).ToArray()).ConfigureAwait(false);
 
             return true;
         }
@@ -244,7 +244,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         {
             var connection = _connectionManager.GetConnection();
             var timeAsRank = Helpers.TimeToRank(maxDate);
-            var keys = await connection.GetDatabase(_db).SortedSetRangeByScoreAsync(setKey, start: -1, stop: timeAsRank);
+            var keys = await connection.GetDatabase(_db).SortedSetRangeByScoreAsync(setKey, -1, timeAsRank).ConfigureAwait(false);
             return keys.Select(k => k.ToString());
         }
 
@@ -303,14 +303,14 @@ namespace LightestNight.System.Caching.Redis.TagCache
                         continue;
 
                     var tag = string.Join(":", tagParts.Skip(3));
-                    var cacheKeys = await GetKeysForTag(tag);
+                    var cacheKeys = await GetKeysForTag(tag).ConfigureAwait(false);
                     foreach (var cacheKey in cacheKeys)
                     {
-                        if (await Exists(cacheKey))
+                        if (await Exists(cacheKey).ConfigureAwait(false))
                             continue;
                         
                         removedKeys.Add(cacheKey);
-                        await RemoveKeyFromTags(cacheKey, tag);
+                        await RemoveKeyFromTags(cacheKey, tag).ConfigureAwait(false);
                     }
                 }
             }
@@ -341,11 +341,11 @@ namespace LightestNight.System.Caching.Redis.TagCache
                         continue;
 
                     var key = string.Join(":", keyParts.Skip(3));
-                    if (await Exists(key))
+                    if (await Exists(key).ConfigureAwait(false))
                         continue;
                     
                     keys.Add(key);
-                    await RemoveTagsForKey(key);
+                    await RemoveTagsForKey(key).ConfigureAwait(false);
                 }
             }
 
@@ -364,7 +364,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
                 return;
 
             var connection = _connectionManager.GetConnection();
-            await connection.GetDatabase(_db).KeyDeleteAsync(KeyTagsListKey(key));
+            await connection.GetDatabase(_db).KeyDeleteAsync(KeyTagsListKey(key)).ConfigureAwait(false);
         }
     }
 

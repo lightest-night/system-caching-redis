@@ -23,7 +23,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// <returns>A collection of cache keys; null if none found</returns>
         public static async Task<IEnumerable<string>?> GetKeysForTag(RedisClient client, string tag)
         {
-            var keys = (await client.GetKeysForTag(tag)).ToArray();
+            var keys = (await client.ThrowIfNull(nameof(client)).GetKeysForTag(tag).ConfigureAwait(false)).ToArray();
             return keys.IsNullOrEmpty() ? null : keys;
         }
         
@@ -33,7 +33,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// <param name="client">The <see cref="RedisClient" /> to use to connect to Redis</param>
         /// <param name="cacheItem">The item to remove the tags from</param>
         public static Task RemoveTags(RedisClient client, CacheItem cacheItem)
-            => Task.WhenAll(RemoveKeyFromTags(client, cacheItem), RemoveTagsForItem(client, cacheItem));
+            => Task.WhenAll(RemoveKeyFromTags(client.ThrowIfNull(nameof(client)), cacheItem), RemoveTagsForItem(client, cacheItem));
 
         /// <summary>
         /// Updates the tags for the given key
@@ -53,11 +53,11 @@ namespace LightestNight.System.Caching.Redis.TagCache
         {
             return keys.ForEach(async key =>
             {
-                var tags = (await GetTagsForKey(client, key))?.ToArray();
+                var tags = (await GetTagsForKey(client, key).ConfigureAwait(false))?.ToArray();
                 var cacheItem = _cacheItemFactory.Create(key, tags);
 
-                await RemoveKeyFromTags(client, cacheItem);
-                await RemoveTagsForItem(client, cacheItem);
+                await RemoveKeyFromTags(client, cacheItem).ConfigureAwait(false);
+                await RemoveTagsForItem(client, cacheItem).ConfigureAwait(false);
             }, Environment.ProcessorCount);
         }
 
@@ -79,7 +79,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         
         private static async Task<IEnumerable<string>?> GetTagsForKey(RedisClient client, string key)
         {
-            var tags = (await client.GetTagsForKey(key)).ToArray();
+            var tags = (await client.GetTagsForKey(key).ConfigureAwait(false)).ToArray();
             return tags.IsNullOrEmpty() ? null : tags;
         }
 
@@ -99,8 +99,8 @@ namespace LightestNight.System.Caching.Redis.TagCache
             if (cacheItem == null || cacheItem.Tags.IsNullOrEmpty())
                 return;
 
-            await RemoveKeyFromTags(client, cacheItem);
-            await client.AddKeyToTags(cacheItem.Key, cacheItem.Tags!);
+            await RemoveKeyFromTags(client, cacheItem).ConfigureAwait(false);
+            await client.AddKeyToTags(cacheItem.Key, cacheItem.Tags!).ConfigureAwait(false);
         }
     }
 }

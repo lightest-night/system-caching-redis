@@ -15,6 +15,8 @@ namespace LightestNight.System.Caching.Redis.TagCache
 
         private Lazy<IEnumerable<IServer>>? _servers;
         private Lazy<ConnectionMultiplexer>? _connection;
+
+        private bool _isDisposed;
         
         /// <summary>
         /// The host we are connecting to Redis via
@@ -70,11 +72,25 @@ namespace LightestNight.System.Caching.Redis.TagCache
 
         public void Dispose()
         {
-            lock (_connectionLock)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_isDisposed)
+                return;
+
+            if (disposing)
             {
-                _connection?.Value.Dispose();
-                _connection = null;
+                lock (_connectionLock)
+                {
+                    _connection?.Value.Dispose();
+                    _connection = null;
+                }
             }
+
+            _isDisposed = true;
         }
         
         private void Initialize()

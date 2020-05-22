@@ -36,7 +36,6 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache.Serialization
                 Tags = new []{"tag1", "tag2", "tag3"}
             };
             
-            value.Value.List = new List<string>();
             for (var i = 0; i < 20; i++)
                 value.Value.List.Add(Guid.NewGuid().ToString());
 
@@ -44,7 +43,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache.Serialization
         }
 
         [Fact]
-        public void Should_Serialize_Successfully()
+        public void ShouldSerializeSuccessfully()
         {
             // Arrange
             var value = CreateTestObject();
@@ -58,7 +57,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache.Serialization
         }
 
         [Fact]
-        public void Should_Deserialize_To_RedisCacheItem_Successfully()
+        public void ShouldDeserializeToRedisCacheItemSuccessfully()
         {
             // Arrange
             var value = CreateTestObject();
@@ -76,7 +75,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache.Serialization
             result.Value.Property1.ShouldBe(value.Value.Property1);
             result.Value.Property2.ShouldBe(value.Value.Property2);
             result.Value.Property3.ShouldBe(value.Value.Property3);
-            result.Tags.Count().ShouldBe(value.Tags.Count());
+            (result.Tags ?? Array.Empty<string>()).Length.ShouldBe((value.Tags ?? Array.Empty<string>()).Length);
             result.Tags.Except(value.Tags).Any().ShouldBeFalse();
         }
 

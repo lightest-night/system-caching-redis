@@ -10,6 +10,6 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         public string? Property2 { get; set; }
         public int Property3 { get; set; }
 
-        public List<string> List { get; set; } = new List<string>();
+        public List<string> List { get; } = new List<string>();
     }
 }

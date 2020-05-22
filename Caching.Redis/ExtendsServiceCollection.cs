@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using LightestNight.System.Caching.Redis.TagCache;
 using LightestNight.System.Caching.Redis.TagCache.Expiry;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +9,7 @@ namespace LightestNight.System.Caching.Redis
 {
     public static class ExtendsServiceCollection
     {
+        [SuppressMessage("ReSharper", "CA2000")]// It's disposed by the IServiceCollection
         public static IServiceCollection AddRedisCache(this IServiceCollection services, Action<CacheConfig> configAction)
         {
             if (configAction == null)
@@ -29,7 +31,7 @@ namespace LightestNight.System.Caching.Redis
                 services.AddSingleton<IRedisCacheProvider>(_ => new RedisCacheProvider(connectionManager));
             }
 
-            services.TryAddSingleton(typeof(ICache), typeof(Cache));
+            services.TryAddSingleton(typeof(ICache), typeof(RedisCache));
 
             if (cacheConfig.ManuallyProcessExpiredKeys)
                 services.AddHostedService<RedisExpiryManager>();

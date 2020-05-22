@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using LightestNight.System.Caching.Redis.TagCache;
 using LightestNight.System.Caching.Redis.TagCache.Serialization;
 using LightestNight.System.Caching.Redis.Tests.TagCache.Helpers;
+using LightestNight.System.Utilities.Extensions;
 using Shouldly;
 using StackExchange.Redis;
 using Xunit;
@@ -22,12 +23,12 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
 
         protected RedisCacheProviderTests(TestFixture fixture)
         {
-            _redis = fixture.RedisConnectionManager;
+            _redis = fixture.ThrowIfNull().RedisConnectionManager;
             _fixture = fixture;
         }
 
         [Fact]
-        public void Should_Construct_Successfully()
+        public void ShouldConstructSuccessfully()
         {
             // Arrange
             var config = BuildCacheConfiguration(_redis);
@@ -46,14 +47,14 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             const string value = "Test Value";
             
             // Assert
-            Should.NotThrow(async () => await cache.Set(key, value, expiry));
+            Should.NotThrow(async () => await cache.SetItem(key, value, expiry).ConfigureAwait(false));
         }
 
         [Fact]
-        public void Should_Construct_Unsuccessfully()
+        public void ShouldConstructUnsuccessfully()
         {
             // Arrange
-            var redis = new RedisConnectionManager("nohost");
+            using var redis = new RedisConnectionManager("nohost");
             var config = BuildCacheConfiguration(redis);
             config.RedisClientConfiguration = new RedisClientConfiguration(redis)
             {
@@ -68,7 +69,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         }
 
         [Fact]
-        public void Set_String_Should_Succeed()
+        public void SetStringShouldSucceed()
         {
             // Arrange
             var cache = new RedisCacheProvider(_redis) {Logger = new TestRedisLogger()};
@@ -77,35 +78,35 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             var expiry = DateTime.Now.AddSeconds(3);
             
             // Act & Assert
-            Should.NotThrow(async () => await cache.Set(key, value, expiry));
+            Should.NotThrow(async () => await cache.SetItem(key, value, expiry).ConfigureAwait(false));
         }
 
         [Fact]
-        public async Task Get_MissingKey_Should_Return_Null()
+        public async Task GetMissingKeyShouldReturnNull()
         {
             // Arrange
             var cache = new RedisCacheProvider(_redis) {Logger = new TestRedisLogger()};
             var key = _fixture.FormatKey($"TagCacheTests:NoValueHere.{DateTime.Now.Ticks}");
             
             // Act
-            var result = await cache.Get<string>(key);
+            var result = await cache.GetItem<string>(key).ConfigureAwait(false);
             
             // Assert
             result.ShouldBeNull();
         }
 
         [Fact]
-        public async Task Should_Return_Value_For_Valid_Key()
+        public async Task ShouldReturnValueForValidKey()
         {
             // Arrange
             var cache = new RedisCacheProvider(_redis) {Logger = new TestRedisLogger()};
             var key = _fixture.FormatKey($"{Guid.NewGuid()}TagCacheTests:Add");
             const string value = "Test Value";
             var expiry = DateTime.Now.AddSeconds(30);
-            await cache.Set(key, value, expiry);
+            await cache.SetItem(key, value, expiry).ConfigureAwait(false);
             
             // Act
-            var result = await cache.Get<string>(key);
+            var result = await cache.GetItem<string>(key).ConfigureAwait(false);
             
             // Arrange
             result.ShouldNotBeNull();
@@ -113,7 +114,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         }
 
         [Fact]
-        public async Task Should_Return_ObjectValue_For_Valid_Key()
+        public async Task ShouldReturnObjectValueForValidKey()
         {
             // Arrange
             var cache = new RedisCacheProvider(_redis) {Logger = new TestRedisLogger()};
@@ -125,10 +126,10 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
                 Property3 = 11
             };
             var expiry = DateTime.Now.AddSeconds(30);
-            await cache.Set(key, value, expiry);
+            await cache.SetItem(key, value, expiry).ConfigureAwait(false);
             
             // Act
-            var result = await cache.Get<TestObject>(key);
+            var result = await cache.GetItem<TestObject>(key).ConfigureAwait(false);
             
             // Assert
             result.ShouldNotBeNull();
@@ -138,28 +139,28 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         }
 
         [Fact]
-        public async Task Should_Return_Null_When_Key_Removed()
+        public async Task ShouldReturnNullWhenKeyRemoved()
         {
             // Arrange
             var cache = new RedisCacheProvider(_redis) {Logger = new TestRedisLogger()};
             var key = _fixture.FormatKey($"{Guid.NewGuid()}TagCacheTests:Add");
             const string value = "Test Value";
             var expiry = DateTime.Now.AddSeconds(30);
-            await cache.Set(key, value, expiry);
+            await cache.SetItem(key, value, expiry).ConfigureAwait(false);
             
             // Act
-            var result = await cache.Get<string>(key);
+            var result = await cache.GetItem<string>(key).ConfigureAwait(false);
             result.ShouldBe(value);
 
-            await cache.Remove(key);
-            result = await cache.Get<string>(key);
+            await cache.Remove(key).ConfigureAwait(false);
+            result = await cache.GetItem<string>(key).ConfigureAwait(false);
             
             // Assert
             result.ShouldBeNull();
         }
 
         [Fact]
-        public async Task Should_Return_Null_When_Multiple_Keys_Removed()
+        public async Task ShouldReturnNullWhenMultipleKeysRemoved()
         {
             // Arrange
             var cache = new RedisCacheProvider(_redis) {Logger = new TestRedisLogger()};
@@ -169,17 +170,18 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             const string value2 = "Test Value 2";
             var expiry = DateTime.Now.AddSeconds(30);
 
-            await Task.WhenAll(cache.Set(key1, value1, expiry), cache.Set(key2, value2, expiry));
+            await Task.WhenAll(cache.SetItem(key1, value1, expiry), cache.SetItem(key2, value2, expiry))
+                .ConfigureAwait(false);
 
-            var result1 = await cache.Get<string>(key1);
-            var result2 = await cache.Get<string>(key2);
+            var result1 = await cache.GetItem<string>(key1).ConfigureAwait(false);
+            var result2 = await cache.GetItem<string>(key2).ConfigureAwait(false);
             result1.ShouldBe(value1);
             result2.ShouldBe(value2);
             
             // Act
-            await cache.Remove(key1, key2);
-            result1 = await cache.Get<string>(key1);
-            result2 = await cache.Get<string>(key2);
+            await cache.Remove(key1, key2).ConfigureAwait(false);
+            result1 = await cache.GetItem<string>(key1).ConfigureAwait(false);
+            result2 = await cache.GetItem<string>(key2).ConfigureAwait(false);
             
             // Assert
             result1.ShouldBeNull();
@@ -187,24 +189,24 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         }
 
         [Fact]
-        public async Task Should_Return_Null_When_Getting_Expired_Item()
+        public async Task ShouldReturnNullWhenGettingExpiredItem()
         {
             // Arrange
             var cache = new RedisCacheProvider(_redis) {Logger = new TestRedisLogger()};
             var key = _fixture.FormatKey($"{Guid.NewGuid()}TagCacheTests:Add");
             const string value = "Test Value";
             var expiry = DateTime.Now.AddYears(-1);
-            await cache.Set(key, value, expiry);
+            await cache.SetItem(key, value, expiry).ConfigureAwait(false);
             
             // Act
-            var result = await cache.Get<string>(key);
+            var result = await cache.GetItem<string>(key).ConfigureAwait(false);
             
             // Assert
             result.ShouldBeNull();
         }
 
         [Fact]
-        public async Task Should_Remove_Tags_When_Item_Expired()
+        public async Task ShouldRemoveTagsWhenItemExpired()
         {
             // Arrange
             var cache = new RedisCacheProvider(_redis) {Logger = new TestRedisLogger()};
@@ -212,17 +214,17 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             const string value = "Test Value";
             const string tag = "Remove Tag";
             var expiry = DateTime.Now.AddYears(-1);
-            await cache.Set(key, value, expiry, tag);
+            await cache.SetItem(key, value, expiry, tag).ConfigureAwait(false);
 
             // Act
-            var result = await RedisTagManager.GetKeysForTag(new RedisClient(_redis), tag);
+            var result = await RedisTagManager.GetKeysForTag(new RedisClient(_redis), tag).ConfigureAwait(false);
 
             // Assert
             result.Any(t => t == tag).ShouldBeFalse();
         }
 
         [Fact]
-        public async Task Should_Get_Single_Item_By_Tag_When_Multiple_Tags_Exist()
+        public async Task ShouldGetSingleItemByTagWhenMultipleTagsExist()
         {
             // Arrange
             var cache = new RedisCacheProvider(_redis) {Logger = new TestRedisLogger()};
@@ -233,10 +235,10 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             var tag1 = $"{Guid.NewGuid()}_tag1";
             var tag2 = $"{Guid.NewGuid()}_tag2";
             var tag3 = $"{Guid.NewGuid()}_tag3";
-            await cache.Set(key, value, expiry, tag1, tag2, tag3);
+            await cache.SetItem(key, value, expiry, tag1, tag2, tag3).ConfigureAwait(false);
 
             // Act
-            var result = (await cache.GetByTag<string>(tag2)).ToArray();
+            var result = (await cache.GetByTag<string>(tag2).ConfigureAwait(false)).ToArray();
 
             // Assert
             result.ShouldNotBeNull();
@@ -244,7 +246,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         }
 
         [Fact]
-        public async Task Should_Get_Multiple_Items_By_Tag_When_Multiple_Are_Associated_With_Same_Tag()
+        public async Task ShouldGetMultipleItemsByTagWhenMultipleAreAssociatedWithSameTag()
         {
             // Arrange
             var cache = new RedisCacheProvider(_redis) {Logger = new TestRedisLogger()};
@@ -257,10 +259,11 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             var tag = $"{Guid.NewGuid()}_tag";
             var expiry = DateTime.Now.AddSeconds(30);
 
-            await Task.WhenAll(cache.Set(key1, value1, expiry, tag), cache.Set(key2, value2, expiry, tag), cache.Set(key3, value3, expiry, tag));
+            await Task.WhenAll(cache.SetItem(key1, value1, expiry, tag), cache.SetItem(key2, value2, expiry, tag),
+                cache.SetItem(key3, value3, expiry, tag)).ConfigureAwait(false);
             
             // Act
-            var result = (await cache.GetByTag<string>(tag)).ToArray();
+            var result = (await cache.GetByTag<string>(tag).ConfigureAwait(false)).ToArray();
             
             // Assert
             result.ShouldNotBeNull();
@@ -268,7 +271,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         }
 
         [Fact]
-        public async Task Should_Remove_All_Items_By_Tag()
+        public async Task ShouldRemoveAllItemsByTag()
         {
             // Arrange
             var cache = new RedisCacheProvider(_redis) {Logger = new TestRedisLogger()};
@@ -281,15 +284,16 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             var tag = $"{Guid.NewGuid()}_tag";
             var expiry = DateTime.Now.AddSeconds(30);
 
-            await Task.WhenAll(cache.Set(key1, value1, expiry, tag), cache.Set(key2, value2, expiry, tag), cache.Set(key3, value3, expiry, tag));
+            await Task.WhenAll(cache.SetItem(key1, value1, expiry, tag), cache.SetItem(key2, value2, expiry, tag),
+                cache.SetItem(key3, value3, expiry, tag)).ConfigureAwait(false);
             
             // Act
-            var result = (await cache.GetByTag<string>(tag)).ToArray();
+            var result = (await cache.GetByTag<string>(tag).ConfigureAwait(false)).ToArray();
             result.ShouldNotBeNull();
             result.ShouldNotBeEmpty();
 
-            await cache.RemoveByTag(tag);
-            result = (await cache.GetByTag<string>(tag)).ToArray();
+            await cache.RemoveByTag(tag).ConfigureAwait(false);
+            result = (await cache.GetByTag<string>(tag).ConfigureAwait(false)).ToArray();
             
             // Assert
             result.ShouldBeEmpty();

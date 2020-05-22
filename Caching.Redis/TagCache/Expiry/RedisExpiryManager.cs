@@ -10,6 +10,7 @@ namespace LightestNight.System.Caching.Redis.TagCache.Expiry
         private readonly IRedisCacheProvider _redisCacheProvider;
 
         private Timer? _timer;
+        private bool _isDisposed;
 
         public RedisExpiryManager(IRedisCacheProvider redisCacheProvider)
         {
@@ -23,7 +24,7 @@ namespace LightestNight.System.Caching.Redis.TagCache.Expiry
             // This can be quite processor intensive depending on the database size, hopefully running only 4 times a day
             // will mitigate this
             _timer = new Timer(
-                async e => await RemoveExpiredKeys(cancellationToken),
+                async e => await RemoveExpiredKeys(cancellationToken).ConfigureAwait(false),
                 null,
                 TimeSpan.Zero,
                 TimeSpan.FromHours(6)
@@ -40,14 +41,26 @@ namespace LightestNight.System.Caching.Redis.TagCache.Expiry
 
         public void Dispose()
         {
-            _timer?.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_isDisposed)
+                return;
+
+            if (disposing)
+                _timer?.Dispose();
+
+            _isDisposed = true;
         }
 
         private async Task RemoveExpiredKeys(CancellationToken cancellationToken)
         {
             if (!cancellationToken.IsCancellationRequested)
             {
-                await _redisCacheProvider.RemoveExpiredKeys();
+                await _redisCacheProvider.RemoveExpiredKeys().ConfigureAwait(false);
             }
         }
     }

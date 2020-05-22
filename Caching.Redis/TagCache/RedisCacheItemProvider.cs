@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using LightestNight.System.Caching.Redis.TagCache.Serialization;
+using LightestNight.System.Utilities.Extensions;
 
 namespace LightestNight.System.Caching.Redis.TagCache
 {
@@ -25,7 +26,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// <returns>The retrieved cache item; null if nothing found</returns>
         public async Task<CacheItem<T>?> Get<T>(RedisClient client, string key)
         {
-            var cacheString = await client.Get(key);
+            var cacheString = await client.ThrowIfNull(nameof(client)).Get(key).ConfigureAwait(false);
             return cacheString.HasValue
                 ? _serializer.Deserialize<CacheItem<T>>(cacheString)
                 : null;
@@ -47,7 +48,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
             
             foreach (var key in keys)
             {
-                var r = await Get<T>(client, key);
+                var r = await Get<T>(client, key).ConfigureAwait(false);
                 if (r != null)
                     result.Add(r);
             }
@@ -69,7 +70,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         {
             var cacheItem = _cacheItemFactory.Create(key, value, expiry, tags);
             var serialized = _serializer.Serialize(cacheItem);
-            return client.Set(key, serialized, expiry);
+            return client.ThrowIfNull(nameof(client)).Set(key, serialized, expiry);
         }
     }
 }

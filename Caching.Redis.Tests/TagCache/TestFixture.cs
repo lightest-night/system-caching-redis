@@ -38,8 +38,8 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
 
         public async Task DisposeAsync()
         {
-            await RedisClient.RemoveKey(_testGroupKey);
-            await RedisClient.RemoveExpiredKeysFromTags();
+            await RedisClient.RemoveKey(_testGroupKey).ConfigureAwait(false);
+            await RedisClient.RemoveExpiredKeysFromTags().ConfigureAwait(false);
         }
     }
 }
