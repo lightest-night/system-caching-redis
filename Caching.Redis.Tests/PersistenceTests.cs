@@ -39,7 +39,7 @@ namespace LightestNight.System.Caching.Redis.Tests
         {
             // Arrange
             const string cacheKey = "TestCacheKey";
-            _redisCacheProviderMock.Setup(x => x.GetItem<object>(It.IsAny<string>())).ReturnsAsync(new object());
+            _redisCacheProviderMock.Setup(x => x.GetItem<object>(It.IsAny<string>())).ReturnsAsync(new CacheItem<object>());
             
             // Act
             await _sut.Get<object>(cacheKey).ConfigureAwait(false);
@@ -133,7 +133,7 @@ namespace LightestNight.System.Caching.Redis.Tests
         {
             // Arrange
             const string tag = "TestTag";
-            _redisCacheProviderMock.Setup(x => x.GetByTag<TestObject>(It.IsAny<string>())).ReturnsAsync(new[] {new TestObject()});
+            _redisCacheProviderMock.Setup(x => x.GetByTag<TestObject>(It.IsAny<string>())).ReturnsAsync(new[] {new CacheItem<TestObject>()});
             
             // Act
             await _sut.GetByTag<TestObject>(tag).ConfigureAwait(false);

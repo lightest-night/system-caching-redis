@@ -23,7 +23,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
 
         protected RedisCacheProviderTests(TestFixture fixture)
         {
-            _redis = fixture.ThrowIfNull().RedisConnectionManager;
+            _redis = fixture.ThrowIfNull(nameof(fixture)).RedisConnectionManager;
             _fixture = fixture;
         }
 
@@ -48,24 +48,6 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             
             // Assert
             Should.NotThrow(async () => await cache.SetItem(key, value, expiry).ConfigureAwait(false));
-        }
-
-        [Fact]
-        public void ShouldConstructUnsuccessfully()
-        {
-            // Arrange
-            using var redis = new RedisConnectionManager("nohost");
-            var config = BuildCacheConfiguration(redis);
-            config.RedisClientConfiguration = new RedisClientConfiguration(redis)
-            {
-                TimeoutMs = 500
-            };
-
-            // Act
-            var exception = Should.Throw<RedisConnectionException>(() => new RedisCacheProvider(config) {Logger = new TestRedisLogger()});
-
-            // Assert
-            exception.Message.ShouldContain("nohost");
         }
 
         [Fact]
@@ -110,7 +92,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             
             // Arrange
             result.ShouldNotBeNull();
-            result.ShouldBe(value);
+            result.Value.ShouldBe(value);
         }
 
         [Fact]
@@ -133,9 +115,9 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             
             // Assert
             result.ShouldNotBeNull();
-            result.Property1.ShouldBe(value.Property1);
-            result.Property2.ShouldBe(value.Property2);
-            result.Property3.ShouldBe(value.Property3);
+            result.Value.Property1.ShouldBe(value.Property1);
+            result.Value.Property2.ShouldBe(value.Property2);
+            result.Value.Property3.ShouldBe(value.Property3);
         }
 
         [Fact]
@@ -150,7 +132,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             
             // Act
             var result = await cache.GetItem<string>(key).ConfigureAwait(false);
-            result.ShouldBe(value);
+            result.Value.ShouldBe(value);
 
             await cache.Remove(key).ConfigureAwait(false);
             result = await cache.GetItem<string>(key).ConfigureAwait(false);
@@ -175,8 +157,8 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
 
             var result1 = await cache.GetItem<string>(key1).ConfigureAwait(false);
             var result2 = await cache.GetItem<string>(key2).ConfigureAwait(false);
-            result1.ShouldBe(value1);
-            result2.ShouldBe(value2);
+            result1.Value.ShouldBe(value1);
+            result2.Value.ShouldBe(value2);
             
             // Act
             await cache.Remove(key1, key2).ConfigureAwait(false);

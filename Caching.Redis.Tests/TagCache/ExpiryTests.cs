@@ -20,7 +20,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
         
         public ExpiryTests(TestFixture fixture)
         {
-            _config = new CacheConfiguration(fixture.ThrowIfNull().RedisConnectionManager);
+            _config = new CacheConfiguration(fixture.ThrowIfNull(nameof(fixture)).RedisConnectionManager);
             _sut = new RedisCacheProvider(_config)
             {
                 Logger = new TestRedisLogger()
@@ -45,13 +45,13 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
             
             var result = await _sut.GetItem<string>(key).ConfigureAwait(false);
             result.ShouldNotBeNull();
-            result.ShouldBe(value);
+            result.Value.ShouldBe(value);
             
             Thread.Sleep(1000);
 
             result = await _sut.GetItem<string>(key).ConfigureAwait(false);
             result.ShouldNotBeNull();
-            result.ShouldBe(value);
+            result.Value.ShouldBe(value);
             
             // Act
             Thread.Sleep(2500);

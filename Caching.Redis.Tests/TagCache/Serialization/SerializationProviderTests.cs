@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using LightestNight.System.Caching.Redis.TagCache.Serialization;
@@ -9,8 +8,7 @@ using Xunit.Abstractions;
 
 namespace LightestNight.System.Caching.Redis.Tests.TagCache.Serialization
 {
-    public abstract class SerializationProviderTests<TCacheItem>
-        where TCacheItem : CacheItem<TestObject>, new()
+    public abstract class SerializationProviderTests
     {
         private readonly ITestOutputHelper _output;
 
@@ -21,9 +19,9 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache.Serialization
         
         protected abstract ISerializationProvider GetSerializer();
 
-        private TCacheItem CreateTestObject()
+        private CacheItem<TestObject> CreateTestObject()
         {
-            var value = new TCacheItem
+            var value = new CacheItem<TestObject>
             {
                 Expiry = DateTime.UtcNow.AddMinutes(10),
                 Key = $"{GetSerializer().GetType().Name}Tests.Key",
@@ -65,7 +63,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache.Serialization
             var serialized = serializer.Serialize(value);
             
             // Act
-            var result = serializer.Deserialize<TCacheItem>(serialized);
+            var result = serializer.Deserialize<CacheItem<TestObject>>(serialized);
             
             // Assert
             result.ShouldNotBeNull();
@@ -109,13 +107,13 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache.Serialization
             // ReSharper disable once NotAccessedVariable - this is to warm up
             var serialized = serializer.Serialize(value);
             // ReSharper disable once NotAccessedVariable - this is to warm up
-            var deserialized = serializer.Deserialize<TCacheItem>(serialized);
+            var deserialized = serializer.Deserialize<CacheItem<TestObject>>(serialized);
             
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             for (var i = 0; i < count; i++)
                 // ReSharper disable once RedundantAssignment
-                deserialized = serializer.Deserialize<TCacheItem>(serialized);
+                deserialized = serializer.Deserialize<CacheItem<TestObject>>(serialized);
             stopwatch.Stop();
             
             _output.WriteLine("{0} items deserialized in {1}ms = {2}ms/item using {3}", count, stopwatch.ElapsedMilliseconds, (double) stopwatch.ElapsedMilliseconds / count, serializer.GetType().Name);

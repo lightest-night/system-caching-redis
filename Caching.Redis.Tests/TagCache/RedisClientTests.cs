@@ -16,7 +16,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
 
         public RedisClientTests(TestFixture fixture)
         {
-            _sut = fixture.ThrowIfNull().RedisClient;
+            _sut = fixture.ThrowIfNull(nameof(fixture)).RedisClient;
             _fixture = fixture;
         }
 

@@ -3,7 +3,7 @@ using Xunit.Abstractions;
 
 namespace LightestNight.System.Caching.Redis.Tests.TagCache.Serialization
 {
-    public class XmlSerializationProviderTests : SerializationProviderTests<CacheItem<TestObject>>
+    public class XmlSerializationProviderTests : SerializationProviderTests
     {
         public XmlSerializationProviderTests(ITestOutputHelper output) : base(output)
         {

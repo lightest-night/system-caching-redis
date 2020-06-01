@@ -21,7 +21,7 @@ namespace LightestNight.System.Caching.Redis.Tests.TagCache
 
         public RedisExpiryManagerTests(TestFixture fixture)
         {
-            _redisClient = fixture.ThrowIfNull().RedisClient;
+            _redisClient = fixture.ThrowIfNull(nameof(fixture)).RedisClient;
             _sut = new RedisExpiryProvider(new CacheConfiguration(fixture.RedisConnectionManager));
 
             _setKey = _sut.SetKey;

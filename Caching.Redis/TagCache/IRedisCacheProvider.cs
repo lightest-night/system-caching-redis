@@ -12,7 +12,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// <param name="key">The key to find the item under</param>
         /// <typeparam name="T">The type of the item</typeparam>
         /// <returns>The item. Null if not found</returns>
-        Task<T> GetItem<T>(string key);
+        Task<CacheItem<T>> GetItem<T>(string key);
 
         /// <summary>
         /// Gets all items associated with the given tag
@@ -20,7 +20,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         /// <param name="tag">The tag to find the associated items under</param>
         /// <typeparam name="T">The type of the items</typeparam>
         /// <returns>Collection of items found; Empty list if not found</returns>
-        Task<IEnumerable<T>> GetByTag<T>(string tag);
+        Task<IEnumerable<CacheItem<T>>> GetByTag<T>(string tag);
 
         /// <summary>
         /// Sets the given item into the cache with the given key, expiry and tags

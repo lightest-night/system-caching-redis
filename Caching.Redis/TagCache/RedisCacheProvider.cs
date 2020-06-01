@@ -28,6 +28,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         public RedisCacheProvider(CacheConfiguration configuration)
         {
             configuration.ThrowIfNull(nameof(configuration));
+            
             _client = new RedisClient(configuration.RedisClientConfiguration.RedisConnectionManager, configuration.RedisClientConfiguration.DbIndex);
             _redisTagManager = new RedisTagManager(configuration.CacheItemFactory);
             _redisExpiryProvider = new RedisExpiryProvider(configuration);
@@ -37,7 +38,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         }
 
         /// <inheritdoc cref="IRedisCacheProvider.GetItem{T}" />
-        public async Task<T> GetItem<T>(string key)
+        public async Task<CacheItem<T>> GetItem<T>(string key)
         {
             var cacheItem = await _redisCacheItemProvider.Get<T>(_client, key).ConfigureAwait(false);
             if (cacheItem != null)
@@ -45,7 +46,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
                 if (await CacheItemIsValid(cacheItem).ConfigureAwait(false))
                 {
                     await Log(nameof(GetItem), key, "Found").ConfigureAwait(false);
-                    return cacheItem.Value;
+                    return cacheItem;
                 }
             }
 
@@ -54,16 +55,16 @@ namespace LightestNight.System.Caching.Redis.TagCache
         }
 
         /// <inheritdoc cref="IRedisCacheProvider.GetByTag{T}" />
-        public async Task<IEnumerable<T>> GetByTag<T>(string tag)
+        public async Task<IEnumerable<CacheItem<T>>> GetByTag<T>(string tag)
         {
             var keys = (await RedisTagManager.GetKeysForTag(_client, tag).ConfigureAwait(false))?.ToArray();
             if (keys.IsNullOrEmpty())
             {
                 await Log(nameof(GetByTag), tag, "Not Found").ConfigureAwait(false);
-                return Enumerable.Empty<T>();
+                return Enumerable.Empty<CacheItem<T>>();
             }
 
-            var result = new ConcurrentBag<T>();
+            var result = new ConcurrentBag<CacheItem<T>>();
             var items = await _redisCacheItemProvider.GetMany<T>(_client, keys).ConfigureAwait(false);
 
             await items.ForEach(async item =>
@@ -73,7 +74,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
                 
                 var value = item.Value;
                 if (value != null)
-                    result.Add(value);
+                    result.Add(item);
             }, Environment.ProcessorCount).ConfigureAwait(false);
 
             await Log(nameof(GetByTag), tag, "Found").ConfigureAwait(false);
@@ -124,6 +125,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
         public async Task Remove(CacheItem cacheItem)
         {
             cacheItem.ThrowIfNull(nameof(cacheItem));
+            
             await Log(nameof(Remove), cacheItem.Key, "Removed via the `Remove(IRedisCacheItem)` method").ConfigureAwait(false);
             await Task.WhenAll(_client.Remove(cacheItem.Key), RedisTagManager.RemoveTags(_client, cacheItem),
                 _redisExpiryProvider.RemoveKeyExpiry(_client, cacheItem.Key)).ConfigureAwait(false);
@@ -160,8 +162,7 @@ namespace LightestNight.System.Caching.Redis.TagCache
 
         private static void SetupExpiryHandler(CacheConfiguration configuration, RedisCacheProvider redisCacheProvider)
         {
-            if (_redisExpiryHandlersByHost == null)
-                _redisExpiryHandlersByHost = new ConcurrentDictionary<string, RedisExpiryHandler>();
+            _redisExpiryHandlersByHost ??= new ConcurrentDictionary<string, RedisExpiryHandler>();
 
             var redisConnectionManager = configuration.RedisClientConfiguration.RedisConnectionManager;
             var host = redisConnectionManager.Host ?? redisConnectionManager.ConnectionString;
